@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Office</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script>
+  // relative URLs need the trailing slash (/office -> /office/)
+  if (!location.pathname.endsWith('/') && !location.pathname.endsWith('.html')) {
+    location.replace(location.pathname + '/' + location.search + location.hash);
+  }
+</script>
+<style>
+  :root { --bg:#f6f7f9; --fg:#1f2937; --muted:#6b7280; --line:#d6d9de; --accent:#0e7c66; --panel:#fff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--line);
+    background: var(--panel); flex-wrap: wrap; }
+  header .title { font-weight: 600; margin-right: 8px; display: flex; align-items: center; gap: 6px; }
+  header .title img { width: 20px; height: 20px; }
+  #docname { color: var(--muted); max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #status { margin-left: auto; color: var(--muted); font-size: 13px; }
+  button, select, input { font: inherit; }
+  button { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  button:hover:not([disabled]) { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button[disabled] { opacity: .5; cursor: default; }
+  main { position: relative; flex: 1; min-height: 0; }
+  #qtcanvas { position: absolute; inset: 0; width: 100%; height: 100%; border: 0 none; padding: 0; outline: none;
+    visibility: hidden; }
+  #home { position: absolute; inset: 0; overflow: auto; padding: 24px; background: var(--bg); }
+  #home .wrap { max-width: 760px; margin: 0 auto; }
+  #home h2 { font-size: 16px; margin: 20px 0 8px; }
+  .new { display: flex; gap: 8px; flex-wrap: wrap; }
+  .new button { padding: 10px 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  td, th { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { font-weight: 500; color: var(--muted); font-size: 12px; }
+  tr:last-child td { border-bottom: 0; }
+  td.name a { color: var(--fg); text-decoration: none; font-weight: 500; }
+  td.name a:hover { color: var(--accent); text-decoration: underline; }
+  td.act { text-align: right; white-space: nowrap; }
+  td.act button { padding: 2px 8px; font-size: 12px; }
+  .empty { color: var(--muted); padding: 14px; }
+  #loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px; background: rgba(246,247,249,.85); }
+  .spinner { width: 48px; height: 48px; border: 5px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #fatal { color: #b91c1c; max-width: 60ch; text-align: center; }
+  dialog { border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 340px; }
+  dialog label { display: block; margin: 8px 0 4px; color: var(--muted); font-size: 12px; }
+  dialog input, dialog select { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  dialog .row.wrap { flex-wrap: wrap; }
+  #conflictDlg { max-width: 460px; }
+  #conflictMsg { margin: 10px 0 0; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <span class="title"><img src="icon.svg" alt="">Office</span>
+  <button id="btnHome" title="Documents on your ship">Documents</button>
+  <span id="docname"></span>
+  <button id="btnSave" class="primary" disabled title="Save to your ship">Save</button>
+  <button id="btnSaveAs" disabled title="Save to your ship under a new name or format">Save as…</button>
+  <button id="btnExport" disabled title="Download to this computer">Download</button>
+  <span id="status"></span>
+</header>
+<main>
+  <canvas id="qtcanvas" contenteditable="true" oncontextmenu="event.preventDefault()"
+          onkeydown="event.preventDefault()" onselectstart="event.preventDefault()"></canvas>
+  <div id="home">
+    <div class="wrap">
+      <h2>New</h2>
+      <div class="new">
+        <button data-new="writer" disabled>Text document</button>
+        <button data-new="calc" disabled>Spreadsheet</button>
+        <button data-new="impress" disabled>Presentation</button>
+        <button id="btnImport" disabled>Open from computer…</button>
+        <input id="fileInput" type="file" class="hidden"
+          accept=".odt,.ods,.odp,.odg,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.rtf,.txt,.csv">
+      </div>
+      <h2>On your ship</h2>
+      <table id="files"><tbody><tr><td class="empty">Loading…</td></tr></tbody></table>
+    </div>
+  </div>
+  <div id="loading"><div class="spinner"></div><div id="loadmsg">Starting LibreOffice…</div><div id="fatal"></div></div>
+</main>
+<dialog id="saveDlg">
+  <form method="dialog">
+    <strong>Save to your ship</strong>
+    <label for="saveName">Name</label>
+    <input id="saveName" required autocomplete="off">
+    <label for="saveFmt">Format</label>
+    <select id="saveFmt"></select>
+    <div class="row"><button value="cancel" formnovalidate>Cancel</button><button value="ok" class="primary" id="saveOk">Save</button></div>
+  </form>
+</dialog>
+<dialog id="conflictDlg">
+  <form method="dialog">
+    <strong id="conflictTitle">Save conflict</strong>
+    <p id="conflictMsg"></p>
+    <div class="row wrap"><button value="cancel" formnovalidate>Cancel</button><button value="reload" id="conflictReload">Reload theirs (discard mine)</button><button value="overwrite" id="conflictOverwrite">Overwrite</button><button value="copy" class="primary" id="conflictCopy">Save mine as a copy</button></div>
+  </form>
+</dialog>
+<script>
+  // LibreOffice needs SharedArrayBuffer, i.e. a cross-origin isolated page.
+  // sw.js adds the COOP/COEP headers; the first visit registers it and reloads.
+  window.OFFICE_BOOT = (function () {
+    var fail = function (msg) { document.getElementById('fatal').textContent = msg; document.querySelector('.spinner').remove(); };
+    var flag = function (v) { try { if (v === undefined) return sessionStorage.getItem('office-coi'); if (v) sessionStorage.setItem('office-coi', '1'); else sessionStorage.removeItem('office-coi'); } catch (e) {} };
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+      fail('Office needs a secure context (HTTPS or localhost) for its service worker and SharedArrayBuffer. Open your ship over HTTPS.');
+      return Promise.reject(new Error('insecure context'));
+    }
+    var reg = navigator.serviceWorker.register('sw.js', { scope: './' });
+    if (window.crossOriginIsolated) { flag(false); return Promise.resolve(); }
+    reg.then(function () { return navigator.serviceWorker.ready; }).then(function () {
+      if (flag()) { fail('Could not enable cross-origin isolation (COOP/COEP) through the service worker.'); return; }
+      flag(true);
+      location.reload();
+    }, function (e) { fail('Service worker registration failed: ' + e); });
+    return new Promise(function () {});
+  })();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

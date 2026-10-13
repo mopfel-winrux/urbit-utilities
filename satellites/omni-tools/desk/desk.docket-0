@@ -1,0 +1,10 @@
+:~  title+'Omni Tools'
+    info+'Everyday image, video, PDF, text and list utilities'
+    color+0xf2.abee
+    image+'/omni-tools/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/iib0011/omni-tools'
+    license+'MIT'
+    base+'omni-tools'
+    site+/omni-tools
+==

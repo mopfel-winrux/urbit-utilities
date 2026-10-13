@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Utilities</title>
+<meta name="description" content="Apps that run in your browser, served from your ship">
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/utilities/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/utilities/icon-192.png">
+<link rel="stylesheet" href="/utilities/app.css">
+<script>
+  try { var t = localStorage.getItem('utilities-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("/utilities/sw.js", { scope: "/utilities/" }).catch(function () {}); });</script>
+<link rel="manifest" href="/utilities/manifest.webmanifest" crossorigin="use-credentials">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/apps" aria-label="Utilities home">
+    <img src="/utilities/icon.svg" alt="" width="32" height="32">
+    <span>Utilities</span>
+  </a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#/apps" data-tab="apps">Apps</a>
+    <a href="#/storage" data-tab="storage">Storage</a>
+  </nav>
+  <button class="icon-btn" id="theme" type="button" title="Theme" aria-label="Switch theme">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+  </button>
+</header>
+
+<main>
+  <section id="view-apps" class="view">
+    <div class="section-head">
+      <h2>Your apps</h2>
+      <span class="muted" id="installed-count"></span>
+    </div>
+    <div id="installed" class="tiles" aria-live="polite"></div>
+
+    <div class="section-head catalog-head">
+      <h2>Catalog</h2>
+      <span class="muted" id="publisher"></span>
+    </div>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+        <input id="search" type="search" placeholder="Search apps" autocomplete="off" aria-label="Search apps">
+      </label>
+      <div id="cats" class="chips" role="group" aria-label="Category"></div>
+    </div>
+    <div id="catalog" class="cards"></div>
+    <p id="catalog-empty" class="empty" hidden>No apps match your search.</p>
+  </section>
+
+  <section id="view-storage" class="view" hidden>
+    <div class="section-head">
+      <h2>Storage</h2>
+      <span class="muted">Files your apps saved to this ship</span>
+      <button class="btn ghost small" id="refresh" type="button">Refresh</button>
+    </div>
+    <div class="storage">
+      <aside id="store-apps" class="store-apps" aria-label="Apps with data"></aside>
+      <div class="store-main">
+        <div id="store-head" class="store-head"></div>
+        <div id="store-items"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="confirm">
+  <form method="dialog">
+    <h3 id="confirm-title"></h3>
+    <p id="confirm-text"></p>
+    <div class="dialog-actions">
+      <button class="btn ghost" value="cancel" type="submit">Cancel</button>
+      <button class="btn danger" value="ok" type="submit" id="confirm-ok">OK</button>
+    </div>
+  </form>
+</dialog>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<script src="/utilities/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+diff --git a/src/app.html b/src/app.html
+index 088d19b..b270e00 100644
+--- a/src/app.html
++++ b/src/app.html
+@@ -5,15 +5,12 @@
+     <meta name="viewport" content="width=device-width, initial-scale=1" />
+ 
+     <!-- Preload self-hosted fonts for default themes (Tokyo Night, Dark, Light) -->
+-    <link rel="preload" as="style" href="/fonts/fonts.css" />
+-    <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all';this.onload=null;" />
++    <link rel="preload" as="style" href="%sveltekit.assets%/fonts/fonts.css" />
++    <link rel="stylesheet" href="%sveltekit.assets%/fonts/fonts.css" media="print" onload="this.media='all';this.onload=null;" />
+     <noscript>
+-      <link rel="stylesheet" href="/fonts/fonts.css" />
++      <link rel="stylesheet" href="%sveltekit.assets%/fonts/fonts.css" />
+     </noscript>
+ 
+-    <!-- Preconnect to Google Fonts for other themes -->
+-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ 
+     <!-- Prevent FOUC by applying theme before page renders -->
+     <script>
+diff --git a/src/lib/components/page-specific/about/ApiSection.svelte b/src/lib/components/page-specific/about/ApiSection.svelte
+index 5b9f240..d9bb273 100644
+--- a/src/lib/components/page-specific/about/ApiSection.svelte
++++ b/src/lib/components/page-specific/about/ApiSection.svelte
+@@ -1,8 +1,7 @@
+ <section id="api">
+   <h2>API</h2>
+   <p>
+-    Yes, we have an API! It's free to use, doesn't require an API key nor CORS.<br />
+-    Try calling <a href="/api"><code>GET https://networkingtoolbox.net/api</code></a>, or checkout the
+-    <a href="/api-docs.html">API Docs</a>.
++    This Urbit build is static and has no API. The hosted instance has a free API: see
++    <a href="https://networkingtoolbox.net/api-docs.html" target="_blank" rel="noopener">networkingtoolbox.net</a>.
+   </p>
+ </section>
+diff --git a/src/lib/components/page-specific/about/AttributionsSection.svelte b/src/lib/components/page-specific/about/AttributionsSection.svelte
+index 7d86240..380c7da 100644
+--- a/src/lib/components/page-specific/about/AttributionsSection.svelte
++++ b/src/lib/components/page-specific/about/AttributionsSection.svelte
+@@ -1,162 +1,9 @@
+-<script lang="ts">
+-  import { onMount } from 'svelte';
+-
+-  // Configuration
+-  const user = 'lissy93';
+-  const repo = 'networking-toolbox';
+-  const apiBase = 'https://readme-contribs.as93.net';
+-  const optionsLarge = '?avatarSize=72&perRow=10&limit=96';
+-  const optionsSmall = '?perRow=16&limit=96';
+-
+-  const githubApi = `https://api.github.com/repos/${user}/${repo}`;
+-
+-  // Fallback iframe URLs
+-  const sponsorsUrl = `${apiBase}/sponsors/${user}${optionsLarge}`;
+-  const contributorsUrl = `${apiBase}/contributors/${user}/${repo}${optionsLarge}`;
+-  const stargazersUrl = `${apiBase}/stargazers/${user}/${repo}${optionsSmall}`;
+-
+-  // State
+-  let sponsors: Array<{ login: string; name?: string; avatarUrl: string }> = [];
+-  let contributors: Array<{ login: string; avatar_url: string }> = [];
+-  let stargazers: Array<{ login: string; avatar_url: string }> = [];
+-  let loadingSponsors = true;
+-  let loadingContributors = true;
+-  let loadingStargazers = true;
+-
+-  onMount(async () => {
+-    // Fetch sponsors
+-    try {
+-      const sponsorsRes = await fetch('https://github-sponsors-api.as93.net/lissy93');
+-      sponsors = sponsorsRes.ok ? await sponsorsRes.json() : [];
+-    } finally {
+-      loadingSponsors = false;
+-    }
+-
+-    // Fetch contributors
+-    try {
+-      const contributorsRes = await fetch(`${githubApi}/contributors?per_page=100`);
+-      contributors = contributorsRes.ok ? await contributorsRes.json() : [];
+-    } finally {
+-      loadingContributors = false;
+-    }
+-
+-    // Fetch stargazers
+-    try {
+-      const stargazersRes = await fetch(`${githubApi}/stargazers?per_page=100`);
+-      stargazers = stargazersRes.ok ? await stargazersRes.json() : [];
+-    } finally {
+-      loadingStargazers = false;
+-    }
+-  });
+-</script>
+-
++<!-- urbit: the upstream section loads sponsors, contributors and stargazers from
++     GitHub and as93.net at runtime; this offline build links to them instead. -->
+ <section id="attributions">
+   <h2>Attributions</h2>
+-
+-  <h3>Sponsors</h3>
+-  {#if !loadingSponsors && sponsors.length > 0}
+-    <div class="avatars-grid">
+-      {#each sponsors.filter((s) => s.login) as sponsor, index (sponsor.login || `sponsor-${index}`)}
+-        <a href="https://github.com/{sponsor.login}" target="_blank" rel="noopener" class="avatar-link">
+-          <img width="72" src={sponsor.avatarUrl} alt={sponsor.name || sponsor.login} class="avatar large" />
+-          <span>{sponsor.name || sponsor.login}</span>
+-        </a>
+-      {/each}
+-    </div>
+-  {:else}
+-    <iframe class="readme-contribs sponsors" src={sponsorsUrl} title="sponsors"></iframe>
+-  {/if}
+-
+-  <h3>Contributors</h3>
+-  {#if !loadingContributors && contributors.length > 0}
+-    <div class="avatars-grid">
+-      {#each contributors.filter((c) => c.login) as contributor, index (contributor.login || `contributor-${index}`)}
+-        <a href="https://github.com/{contributor.login}" target="_blank" rel="noopener" class="avatar-link">
+-          <img width="72" src={contributor.avatar_url} alt={contributor.login} class="avatar large" />
+-          <span>{contributor.login}</span>
+-        </a>
+-      {/each}
+-    </div>
+-  {:else}
+-    <iframe class="readme-contribs contributors" src={contributorsUrl} title="contributors"></iframe>
+-  {/if}
+-
+-  <h3>Stargazers</h3>
+-  {#if !loadingStargazers && stargazers.length > 0}
+-    <div class="avatars-grid small">
+-      {#each stargazers.filter((s) => s.login) as stargazer, index (stargazer.login || `stargazer-${index}`)}
+-        <a href="https://github.com/{stargazer.login}" target="_blank" rel="noopener" class="avatar-link small-link">
+-          <img width="72" src={stargazer.avatar_url} alt={stargazer.login} class="avatar small" />
+-          <span>{stargazer.login}</span>
+-        </a>
+-      {/each}
+-    </div>
+-  {:else}
+-    <iframe class="readme-contribs stargazers" src={stargazersUrl} title="stargazers"></iframe>
+-  {/if}
++  <p>
++    Networking Toolbox is built by <a href="https://github.com/lissy93" target="_blank" rel="noopener">Alicia Sykes</a>
++    and <a href="https://github.com/Lissy93/networking-toolbox/graphs/contributors" target="_blank" rel="noopener">its contributors</a>.
++  </p>
+ </section>
+-
+-<style>
+-  .readme-contribs {
+-    border: none;
+-    width: 100%;
+-    max-height: 512px;
+-    &.sponsors,
+-    &.contributors {
+-      min-height: 240px;
+-    }
+-    &.stargazers {
+-      min-height: 360px;
+-    }
+-  }
+-
+-  .avatars-grid {
+-    display: flex;
+-    flex-wrap: wrap;
+-    gap: var(--spacing-xs);
+-    margin: var(--spacing-md) 0;
+-    &.small {
+-      gap: var(--spacing-2xs);
+-    }
+-  }
+-  .avatar-link {
+-    display: flex;
+-    flex-direction: column;
+-    align-items: center;
+-    text-decoration: none;
+-    color: var(--text-primary);
+-    transition: transform 0.2s;
+-    &:hover img {
+-      transform: scale(1.1);
+-      border-color: var(--color-primary);
+-    }
+-    span {
+-      margin-top: var(--spacing-xs);
+-      font-size: var(--font-size-2xs);
+-      text-align: center;
+-      word-break: break-word;
+-      overflow: hidden;
+-      white-space: nowrap;
+-      max-width: 60px;
+-      text-overflow: ellipsis;
+-      opacity: 0.8;
+-    }
+-    &.small-link span {
+-      max-width: 40px;
+-      opacity: 0.5;
+-    }
+-    .avatar {
+-      border-radius: 50%;
+-      border: 2px solid var(--border-primary);
+-      transition: all 0.15s ease-in-out;
+-      &.large {
+-        width: 72px;
+-        height: 72px;
+-      }
+-      &.small {
+-        width: 48px;
+-        height: 48px;
+-      }
+-    }
+-  }
+-</style>
+diff --git a/src/lib/components/page-specific/about/AuthorSection.svelte b/src/lib/components/page-specific/about/AuthorSection.svelte
+index 9e2ceb7..7bee549 100644
+--- a/src/lib/components/page-specific/about/AuthorSection.svelte
++++ b/src/lib/components/page-specific/about/AuthorSection.svelte
+@@ -69,7 +69,6 @@
+         security, Linux and self-hosting. But also just love to build things that are fun and (sometimes, maybe) useful.
+       </p>
+     </div>
+-    <img class="profile-photo" src={author.avatar} alt={author.name} width="128" />
+   </div>
+   {#if longMode}
+     <div class="link-button blue">
+@@ -96,7 +95,6 @@
+     <ul class="more-app-list">
+       {#each moreApps as app (app.name)}
+         <li class="app-item">
+-          <img src={app.icon} alt={app.title} width="24" height="24" />
+           <div class="app-content">
+             <a
+               href="https://github.com/lissy93/{app.name}"
+diff --git a/src/lib/components/tools/IPRegexGenerator.svelte b/src/lib/components/tools/IPRegexGenerator.svelte
+index e913908..13635ab 100644
+--- a/src/lib/components/tools/IPRegexGenerator.svelte
++++ b/src/lib/components/tools/IPRegexGenerator.svelte
+@@ -776,7 +776,6 @@
+                 onclick={() => (openLanguageExample = openLanguageExample === example.name ? null : example.name)}
+               >
+                 <div class="language-info">
+-                  <img src="https://cdn.simpleicons.org/{example.icon}" alt={example.name} class="language-icon" />
+                   <span class="language-name">{example.name}</span>
+                 </div>
+                 <Icon name="chevron-down" size="sm" rotate={openLanguageExample === example.name ? 180 : 0} />
+diff --git a/src/lib/config/customizable-settings.ts b/src/lib/config/customizable-settings.ts
+index dca2118..1981969 100644
+--- a/src/lib/config/customizable-settings.ts
++++ b/src/lib/config/customizable-settings.ts
+@@ -120,14 +120,14 @@ export const ALLOWED_DNS_SERVERS = env.NTB_ALLOWED_DNS_SERVERS
+  * Set to 'false' to disable analytics entirely
+  * Default: 'networking-toolbox.as93.net'
+  */
+-export const ANALYTICS_DOMAIN = env.NTB_ANALYTICS_DOMAIN ?? 'networking-toolbox.as93.net';
++export const ANALYTICS_DOMAIN = 'false'; // urbit: no analytics
+ 
+ /**
+  * Analytics script URL (for Plausible or similar analytics)
+  * Set to 'false' to disable analytics entirely
+  * Default: 'https://no-track.as93.net/js/script.js'
+  */
+-export const ANALYTICS_DSN = env.NTB_ANALYTICS_DSN ?? 'https://no-track.as93.net/js/script.js';
++export const ANALYTICS_DSN = 'false'; // urbit: no analytics
+ 
+ /**
+  * Check if analytics is enabled
+diff --git a/src/lib/config/font-config.ts b/src/lib/config/font-config.ts
+index edcd89b..53f2963 100644
+--- a/src/lib/config/font-config.ts
++++ b/src/lib/config/font-config.ts
+@@ -1,3 +1,4 @@
++import { base } from '$app/paths';
+ /**
+  * Font Loading Configuration
+  * Hybrid approach: Use self-hosted fonts for downloaded fonts, Google Fonts CDN for others
+@@ -9,7 +10,7 @@
+ export const USE_SELF_HOSTED_FONTS = true;
+ 
+ // Self-hosted fonts base path
+-export const SELF_HOSTED_FONTS_PATH = '/fonts/fonts.css';
++export const SELF_HOSTED_FONTS_PATH = `${base}/fonts/fonts.css`;
+ 
+ // Google Fonts CDN base
+ export const GOOGLE_FONTS_CDN = 'https://fonts.googleapis.com/css2?family=';
+diff --git a/src/lib/constants/nav.ts b/src/lib/constants/nav.ts
+index 45ec065..71049b2 100644
+--- a/src/lib/constants/nav.ts
++++ b/src/lib/constants/nav.ts
+@@ -1,6 +1,7 @@
+ import { resolve } from '$app/paths';
+ import { site, author, license as _license } from '$lib/constants/site';
+ import { extractAllNavItems } from '$lib/utils/nav-helpers';
++import { isStaticDeployment } from '$lib/utils/deployment';
+ 
+ // Helper function to create paths with base path support
+ function makePath(path: string): string {
+@@ -54,7 +55,7 @@ export const STANDALONE_PAGES: NavItem[] = [
+   // },
+ ];
+ 
+-export const TOP_NAV: NavItem[] = [
++const _TOP_NAV: NavItem[] = [
+   {
+     href: makePath('/subnetting'),
+     label: 'Subnetting',
+@@ -118,6 +119,9 @@ export const TOP_NAV: NavItem[] = [
+   },
+ ];
+ 
++// urbit: static build has no API routes, so hide the server-side lookups (diagnostics)
++export const TOP_NAV: NavItem[] = _TOP_NAV.filter((i) => !(isStaticDeployment && i.href.endsWith('/diagnostics')));
++
+ // Sections that have sub-pages (drives the conditional SubHeader)
+ export const SUB_NAV: Record<string, (NavItem | NavGroup)[]> = {
+   '/subnetting': [
+@@ -2014,6 +2018,8 @@ export const footerLinks: NavItem[] = [
+   { href: author.portfolio, label: 'More Apps →' },
+ ];
+ 
++if (isStaticDeployment) delete SUB_NAV['/diagnostics'];
++
+ // All pages for homepage navigation - combines standalone pages with sub-pages
+ export const ALL_PAGES: NavItem[] = [
+   ...Object.values(SUB_NAV)
+diff --git a/src/lib/constants/theme-list.ts b/src/lib/constants/theme-list.ts
+index 0b06421..8bd8d8f 100644
+--- a/src/lib/constants/theme-list.ts
++++ b/src/lib/constants/theme-list.ts
+@@ -20,10 +20,8 @@ const SELF_HOSTED_AVAILABLE = ['Fira Code', 'Fira Sans', 'Inter'];
+ // Helper to get font URL (Google Fonts CDN or self-hosted)
+ // Only uses self-hosted path if the font family is available locally
+ const getFontUrl = (fontFamily: string, googleFontsUrl: string) => {
+-  if (USE_SELF_HOSTED_FONTS && SELF_HOSTED_AVAILABLE.includes(fontFamily)) {
+-    return SELF_HOSTED_FONTS_PATH;
+-  }
+-  return googleFontsUrl;
++  // urbit: never load Google Fonts; other theme fonts use their CSS fallbacks
++  return SELF_HOSTED_FONTS_PATH;
+ };
+ 
+ const fonts = {
+diff --git a/src/lib/stores/offline.ts b/src/lib/stores/offline.ts
+index 6716bb6..c58f16c 100644
+--- a/src/lib/stores/offline.ts
++++ b/src/lib/stores/offline.ts
+@@ -77,9 +77,7 @@ async function registerServiceWorker() {
+   // This allows offline testing while preserving HMR functionality
+ 
+   try {
+-    const registration = await navigator.serviceWorker.register('/sw.js', {
+-      scope: '/',
+-    });
++    const registration = await navigator.serviceWorker.ready; // urbit: kit/pwa.py registers a /nettools/-scoped worker
+ 
+     serviceWorkerRegistered.set(true);
+     log('SW', ' Service worker registered successfully');
+diff --git a/src/lib/utils/mac-address.ts b/src/lib/utils/mac-address.ts
+index 0dc3a09..390c4ee 100644
+--- a/src/lib/utils/mac-address.ts
++++ b/src/lib/utils/mac-address.ts
+@@ -1,3 +1,4 @@
++import { isStaticDeployment } from '$lib/utils/deployment';
+ // MAC Address formatting and OUI lookup utilities
+ 
+ export interface MACFormat {
+@@ -103,6 +104,7 @@ async function lookupOUI(normalized: string): Promise<OUIInfo> {
+   const oui = normalized.slice(0, 6).toUpperCase();
+   const ouiFormatted = oui.match(/.{1,2}/g)!.join(':');
+ 
++  if (isStaticDeployment) return { oui: ouiFormatted, manufacturer: null, found: false };
+   try {
+     const response = await fetch(`/api/internal/mac-lookup?oui=${encodeURIComponent(ouiFormatted)}`);
+ 
+diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
+index 1ebff0f..6e7dc7c 100644
+--- a/src/routes/+layout.svelte
++++ b/src/routes/+layout.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++  import { base } from '$app/paths';
+   import { onMount } from 'svelte';
+   import { page } from '$app/stores';
+   import '../styles/base.scss';
+@@ -292,7 +293,7 @@
+   <meta name="generator" content="SvelteKit" />
+ 
+   <!-- PWA Manifest -->
+-  <link rel="manifest" href="/manifest.json" />
++  <link rel="manifest" href="{base}/manifest.json" crossorigin="use-credentials" />
+   <meta name="mobile-web-app-capable" content="yes" />
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+@@ -408,7 +409,7 @@
+ 
+   <!-- Custom Styles for Self-Hosted Instances -->
+   <!-- This loads last to ensure custom styles can override defaults -->
+-  <link rel="stylesheet" href="/custom-styles.css" />
++  <link rel="stylesheet" href="{base}/custom-styles.css" />
+ </svelte:head>
+ 
+ <!-- Skip Links for Accessibility -->
+diff --git a/src/routes/+layout.ts b/src/routes/+layout.ts
+new file mode 100644
+index 0000000..d3c3250
+--- /dev/null
++++ b/src/routes/+layout.ts
+@@ -0,0 +1 @@
++export const trailingSlash = 'always';
+diff --git a/static/fonts/fonts.css b/static/fonts/fonts.css
+index fee0cb0..190cd59 100644
+--- a/static/fonts/fonts.css
++++ b/static/fonts/fonts.css
+@@ -12,7 +12,7 @@
+   src:
+     local('Fira Code Regular'),
+     local('FiraCode-Regular'),
+-    url('/fonts/fira-code-v27-latin-regular.woff2') format('woff2');
++    url('./fira-code-v27-latin-regular.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -23,7 +23,7 @@
+   src:
+     local('Fira Code Medium'),
+     local('FiraCode-Medium'),
+-    url('/fonts/fira-code-v27-latin-500.woff2') format('woff2');
++    url('./fira-code-v27-latin-500.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -34,7 +34,7 @@
+   src:
+     local('Fira Code SemiBold'),
+     local('FiraCode-SemiBold'),
+-    url('/fonts/fira-code-v27-latin-600.woff2') format('woff2');
++    url('./fira-code-v27-latin-600.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -45,7 +45,7 @@
+   src:
+     local('Fira Code Bold'),
+     local('FiraCode-Bold'),
+-    url('/fonts/fira-code-v27-latin-700.woff2') format('woff2');
++    url('./fira-code-v27-latin-700.woff2') format('woff2');
+ }
+ 
+ /* Fira Sans - Companion Font for Fira Code */
+@@ -57,7 +57,7 @@
+   src:
+     local('Fira Sans Regular'),
+     local('FiraSans-Regular'),
+-    url('/fonts/fira-sans-v18-latin-regular.woff2') format('woff2');
++    url('./fira-sans-v18-latin-regular.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -68,7 +68,7 @@
+   src:
+     local('Fira Sans Medium'),
+     local('FiraSans-Medium'),
+-    url('/fonts/fira-sans-v18-latin-500.woff2') format('woff2');
++    url('./fira-sans-v18-latin-500.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -79,7 +79,7 @@
+   src:
+     local('Fira Sans SemiBold'),
+     local('FiraSans-SemiBold'),
+-    url('/fonts/fira-sans-v18-latin-600.woff2') format('woff2');
++    url('./fira-sans-v18-latin-600.woff2') format('woff2');
+ }
+ 
+ /* Inter - Light Theme Font */
+@@ -91,7 +91,7 @@
+   src:
+     local('Inter Regular'),
+     local('Inter-Regular'),
+-    url('/fonts/inter-v20-latin-regular.woff2') format('woff2');
++    url('./inter-v20-latin-regular.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -102,7 +102,7 @@
+   src:
+     local('Inter Medium'),
+     local('Inter-Medium'),
+-    url('/fonts/inter-v20-latin-500.woff2') format('woff2');
++    url('./inter-v20-latin-500.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -113,7 +113,7 @@
+   src:
+     local('Inter SemiBold'),
+     local('Inter-SemiBold'),
+-    url('/fonts/inter-v20-latin-600.woff2') format('woff2');
++    url('./inter-v20-latin-600.woff2') format('woff2');
+ }
+ 
+ @font-face {
+@@ -124,5 +124,5 @@
+   src:
+     local('Inter Bold'),
+     local('Inter-Bold'),
+-    url('/fonts/inter-v20-latin-700.woff2') format('woff2');
++    url('./inter-v20-latin-700.woff2') format('woff2');
+ }
+diff --git a/static/manifest.json b/static/manifest.json
+index ffda1d6..2ecd6f1 100644
+--- a/static/manifest.json
++++ b/static/manifest.json
+@@ -2,54 +2,59 @@
+   "name": "Networking Toolbox",
+   "short_name": "Net Toolbox",
+   "description": "Comprehensive IP address calculator with subnet calculations, CIDR conversion, IP format conversion, and network reference tools.",
+-  "start_url": "/",
+-  "scope": "/",
++  "start_url": "./",
++  "scope": "./",
+   "display": "standalone",
+   "orientation": "any",
+   "theme_color": "#e3ed70",
+   "background_color": "#21262d",
+-  "categories": ["utilities", "productivity", "developer", "networking"],
++  "categories": [
++    "utilities",
++    "productivity",
++    "developer",
++    "networking"
++  ],
+   "lang": "en-US",
+   "dir": "ltr",
+   "icons": [
+     {
+-      "src": "/favicon-32x32.png",
++      "src": "./favicon-32x32.png",
+       "sizes": "32x32",
+       "type": "image/png",
+       "purpose": "any"
+     },
+     {
+-      "src": "/favicon.png",
++      "src": "./favicon.png",
+       "sizes": "48x48",
+       "type": "image/png",
+       "purpose": "any maskable"
+     },
+     {
+-      "src": "/icon.png",
++      "src": "./icon.png",
+       "sizes": "72x72 96x96 144x144 192x192",
+       "type": "image/png",
+       "purpose": "any"
+     },
+     {
+-      "src": "/icon.png",
++      "src": "./icon.png",
+       "sizes": "192x192",
+       "type": "image/png",
+       "purpose": "maskable"
+     },
+     {
+-      "src": "/icon.png",
++      "src": "./icon.png",
+       "sizes": "384x384 512x512 1024x1024",
+       "type": "image/png",
+       "purpose": "any"
+     },
+     {
+-      "src": "/icon.png",
++      "src": "./icon.png",
+       "sizes": "512x512",
+       "type": "image/png",
+       "purpose": "maskable"
+     },
+     {
+-      "src": "/favicon.ico",
++      "src": "./favicon.ico",
+       "sizes": "16x16 32x32 48x48",
+       "type": "image/x-icon",
+       "purpose": "any"
+@@ -60,10 +65,10 @@
+       "name": "IPv4 Subnet Calculator",
+       "short_name": "IPv4 Subnet",
+       "description": "Calculate subnet masks, host ranges, and network information",
+-      "url": "/subnetting/ipv4-subnet-calculator",
++      "url": "./subnetting/ipv4-subnet-calculator",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -72,10 +77,10 @@
+       "name": "CIDR Tools",
+       "short_name": "CIDR",
+       "description": "CIDR notation converter and subnet calculator",
+-      "url": "/cidr",
++      "url": "./cidr",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -84,10 +89,10 @@
+       "name": "IP Address Converter",
+       "short_name": "IP Tools",
+       "description": "Convert between IP formats and validate addresses",
+-      "url": "/ip-address-convertor",
++      "url": "./ip-address-convertor",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -96,22 +101,10 @@
+       "name": "DNS Record Generators",
+       "short_name": "DNS",
+       "description": "Generate DNS records, zone files, and DNSSEC keys",
+-      "url": "/dns",
++      "url": "./dns",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
+-          "sizes": "32x32"
+-        }
+-      ]
+-    },
+-    {
+-      "name": "Network Diagnostics",
+-      "short_name": "Diagnostics",
+-      "description": "DNS lookup, WHOIS, ping, and network testing tools",
+-      "url": "/diagnostics",
+-      "icons": [
+-        {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -120,10 +113,10 @@
+       "name": "Networking Reference",
+       "short_name": "Reference",
+       "description": "Network protocols, port numbers, and technical guides",
+-      "url": "/reference",
++      "url": "./reference",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -132,10 +125,10 @@
+       "name": "DHCP Options",
+       "short_name": "DHCP",
+       "description": "DHCP option generators for network configuration",
+-      "url": "/dhcp",
++      "url": "./dhcp",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -144,10 +137,10 @@
+       "name": "Bookmarked Tools",
+       "short_name": "Bookmarks",
+       "description": "Quick access to your favorite tools (works offline)",
+-      "url": "/bookmarks",
++      "url": "./bookmarks",
+       "icons": [
+         {
+-          "src": "/favicon-32x32.png",
++          "src": "./favicon-32x32.png",
+           "sizes": "32x32"
+         }
+       ]
+@@ -155,7 +148,7 @@
+   ],
+   "screenshots": [
+     {
+-      "src": "/banner.png",
++      "src": "./banner.png",
+       "sizes": "1200x675",
+       "type": "image/png",
+       "platform": "wide",
+@@ -180,11 +173,15 @@
+   "launch_handler": {
+     "client_mode": "navigate-existing"
+   },
+-  "display_override": ["standalone", "minimal-ui", "browser"],
++  "display_override": [
++    "standalone",
++    "minimal-ui",
++    "browser"
++  ],
+   "protocol_handlers": [],
+   "file_handlers": [],
+   "share_target": {
+-    "action": "/",
++    "action": "./",
+     "method": "GET",
+     "enctype": "application/x-www-form-urlencoded",
+     "params": {
+diff --git a/svelte.config.js b/svelte.config.js
+index 9c6ab0e..8d58850 100644
+--- a/svelte.config.js
++++ b/svelte.config.js
+@@ -78,6 +78,7 @@ const config = {
+ 		adapter: getAdapter(),
+ 		paths: {
+ 			base: process.env.BASE_URL || process.env.BASE_PATH || '',
++			relative: false,
+ 		},
+ 		env: {
+ 			publicPrefix: 'NTB_',

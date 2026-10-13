@@ -1,0 +1,10 @@
+:~  title+'BentoPDF'
+    info+'Merge, split, compress, sign and convert PDFs locally'
+    color+0xf2.abee
+    image+'/bentopdf/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/alam00000/bentopdf'
+    license+'AGPL-3.0-only'
+    base+'bentopdf'
+    site+/bentopdf
+==

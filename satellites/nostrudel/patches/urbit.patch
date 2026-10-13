@@ -1,0 +1,205 @@
+diff --git a/public/.well-known/nostr.json b/public/.well-known/nostr.json
+deleted file mode 100644
+index f0045f3..0000000
+--- a/public/.well-known/nostr.json
++++ /dev/null
+@@ -1,6 +0,0 @@
+-{
+-  "names": {
+-    "_": "713978c3094081b34fcf2f5491733b0c22728cd3b7a6946519d40f5f08598af8",
+-    "noStrudel": "713978c3094081b34fcf2f5491733b0c22728cd3b7a6946519d40f5f08598af8"
+-  }
+-}
+diff --git a/src/app.tsx b/src/app.tsx
+index 4308367..e73e05b 100644
+--- a/src/app.tsx
++++ b/src/app.tsx
+@@ -128,7 +128,7 @@ export const router = createBrowserRouter(
+       ],
+     },
+   ],
+-  { future: { v7_relativeSplatPath: true } },
++  { future: { v7_relativeSplatPath: true }, basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" },
+ );
+ 
+ export const App = () => (
+diff --git a/src/components/layout/mobile/bottom-nav.tsx b/src/components/layout/mobile/bottom-nav.tsx
+index a1330e0..a5fe926 100644
+--- a/src/components/layout/mobile/bottom-nav.tsx
++++ b/src/components/layout/mobile/bottom-nav.tsx
+@@ -30,7 +30,7 @@ export default function MobileBottomNav() {
+         {account ? (
+           <UserAvatar pubkey={account.pubkey} size="sm" onClick={drawer.onOpen} noProxy />
+         ) : (
+-          <Avatar size="sm" src="/apple-touch-icon.png" onClick={drawer.onOpen} cursor="pointer" />
++          <Avatar size="sm" src={import.meta.env.BASE_URL + "apple-touch-icon.png"} onClick={drawer.onOpen} cursor="pointer" />
+         )}
+         <IconButton as={RouterLink} icon={<NotesIcon boxSize={6} />} aria-label="Home" flexGrow="1" size="md" to="/" />
+         <IconButton
+diff --git a/src/components/layout/mobile/nav-drawer.tsx b/src/components/layout/mobile/nav-drawer.tsx
+index a9f587a..c910a04 100644
+--- a/src/components/layout/mobile/nav-drawer.tsx
++++ b/src/components/layout/mobile/nav-drawer.tsx
+@@ -47,7 +47,7 @@ export default function NavDrawer({ onClose, ...props }: Omit<DrawerProps, "chil
+           >
+             {!account && (
+               <Flex gap="2" alignItems="center">
+-                <Avatar src="/apple-touch-icon.png" size="md" aria-label="Nostrudel logo" />
++                <Avatar src={import.meta.env.BASE_URL + "apple-touch-icon.png"} size="md" aria-label="Nostrudel logo" />
+                 <Text as="h1" m={0} fontSize="xl">
+                   Nostrudel
+                 </Text>
+diff --git a/src/helpers/app-settings.ts b/src/helpers/app-settings.ts
+index a7496dc..72ca217 100644
+--- a/src/helpers/app-settings.ts
++++ b/src/helpers/app-settings.ts
+@@ -85,7 +85,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
+   showPubkeyColor: "avatar",
+   removeEmojisInUsernames: false,
+   showContentWarning: true,
+-  loadOpenGraphData: true,
++  loadOpenGraphData: false,
+ 
+   // posting
+   noteDifficulty: null,
+diff --git a/src/services/event-cache/index.ts b/src/services/event-cache/index.ts
+index f8d191c..23667a4 100644
+--- a/src/services/event-cache/index.ts
++++ b/src/services/event-cache/index.ts
+@@ -8,7 +8,8 @@ import localSettings from "../preferences";
+ import { EventCache } from "./interface";
+ 
+ // An ordered array of fallback types to use when event cache fails to load
+-const FALLBACKS: string[] = ["local-relay", "nostr-idb", "none"];
++// urbit: start with the in-browser cache; a ws://localhost relay can still be chosen in settings
++const FALLBACKS: string[] = ["nostr-idb", "none"];
+ 
+ // Default to wasm-worker on web, native-sqlite on native
+ if (CAP_IS_NATIVE) FALLBACKS.splice(1, 0, "native-sqlite");
+diff --git a/src/views/404/index.tsx b/src/views/404/index.tsx
+index 890c00b..c79f510 100644
+--- a/src/views/404/index.tsx
++++ b/src/views/404/index.tsx
+@@ -28,7 +28,7 @@ export default function NoteFoundView() {
+   return (
+     <Flex direction="column" p="2" gap="10" w="full" alignItems="center" h="full" pt="15vh">
+       <ImageContainer>
+-        <Image src="/logo.svg" w="48" />
++        <Image src={import.meta.env.BASE_URL + "logo.svg"} w="48" />
+       </ImageContainer>
+       <Heading fontSize="9xl" fontFamily="monospace">
+         404
+diff --git a/src/views/signin/connect/signer.tsx b/src/views/signin/connect/signer.tsx
+index 218f695..64e64dc 100644
+--- a/src/views/signin/connect/signer.tsx
++++ b/src/views/signin/connect/signer.tsx
+@@ -45,7 +45,7 @@ export default function SigninConnectSignerView() {
+     return signer.getNostrConnectURI({
+       name: "noStrudel",
+       url: location.protocol + "//" + location.host,
+-      image: new URL("/apple-touch-icon.png", location.protocol + "//" + location.host).toString(),
++      image: new URL(import.meta.env.BASE_URL + "apple-touch-icon.png", location.protocol + "//" + location.host).toString(),
+     });
+   }, [signer]);
+ 
+diff --git a/src/views/signin/index.tsx b/src/views/signin/index.tsx
+index 91636da..0c907d9 100644
+--- a/src/views/signin/index.tsx
++++ b/src/views/signin/index.tsx
+@@ -12,7 +12,7 @@ export default function SigninView() {
+     <>
+       <Flex w="full" justifyContent="center">
+         <Flex direction="column" alignItems="center" gap="2" maxW="md" w="full" px="4" py="10">
+-          <Avatar src="/apple-touch-icon.png" size="lg" flexShrink={0} />
++          <Avatar src={import.meta.env.BASE_URL + "apple-touch-icon.png"} size="lg" flexShrink={0} />
+           <Heading size="lg" mb="2">
+             Sign in
+           </Heading>
+diff --git a/src/views/signup/components/common.tsx b/src/views/signup/components/common.tsx
+index c093aec..42ea257 100644
+--- a/src/views/signup/components/common.tsx
++++ b/src/views/signup/components/common.tsx
+@@ -1,6 +1,6 @@
+ import { Avatar, FlexProps } from "@chakra-ui/react";
+ 
+-export const AppIcon = () => <Avatar src="/apple-touch-icon.png" size="lg" flexShrink={0} />;
++export const AppIcon = () => <Avatar src={import.meta.env.BASE_URL + "apple-touch-icon.png"} size="lg" flexShrink={0} />;
+ 
+ export const containerProps: FlexProps = {
+   w: "full",
+diff --git a/src/views/wiki/components/markdown-editor.tsx b/src/views/wiki/components/markdown-editor.tsx
+index d21c7fb..84fd4d9 100644
+--- a/src/views/wiki/components/markdown-editor.tsx
++++ b/src/views/wiki/components/markdown-editor.tsx
+@@ -8,6 +8,8 @@ import SimpleMDE, { SimpleMDEReactProps } from "react-simplemde-editor";
+ 
+ import EasyMDE from "easymde";
+ import "easymde/dist/easymde.min.css";
++// urbit: vendored Font Awesome 4.7 (EasyMDE would load it from maxcdn)
++import "../../../vendor/font-awesome/css/font-awesome.min.css";
+ 
+ import useAppSettings from "../../../hooks/use-user-app-settings";
+ import useUsersMediaServers from "../../../hooks/use-user-blossom-servers";
+@@ -53,6 +55,9 @@ export default function MarkdownEditor({ options, ...props }: SimpleMDEReactProp
+ 
+     return {
+       minHeight: "60vh",
++      // urbit: no CDN downloads (spell-check dictionaries and Font Awesome)
++      spellChecker: false,
++      autoDownloadFontAwesome: false,
+       uploadImage: uploads,
+       imageUploadFunction: uploads ? imageUploadFunction : undefined,
+       toolbar: [
+diff --git a/vite.config.ts b/vite.config.ts
+index 6e265d1..15c2ae4 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -13,7 +13,7 @@ export default defineConfig({
+   base: process.env.VITE_BASE ?? "/",
+   build: {
+     target: ["chrome89", "edge89", "firefox89", "safari15"],
+-    sourcemap: true,
++    sourcemap: false,
+     rollupOptions: {
+       output: {
+         manualChunks: {
+@@ -46,7 +46,7 @@ export default defineConfig({
+       },
+       injectManifest: {
+         minify: false,
+-        sourcemap: true,
++        sourcemap: false,
+         // This increase the cache limit to 8mB
+         maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
+         // Ensure index.html is included in the manifest
+@@ -65,11 +65,11 @@ export default defineConfig({
+         theme_color: "#8DB600",
+         categories: ["social"],
+         icons: [
+-          { src: "/favicon.ico", type: "image/x-icon", sizes: "16x16 32x32" },
+-          { src: "/icon-192.png", type: "image/png", sizes: "192x192" },
+-          { src: "/icon-512.png", type: "image/png", sizes: "512x512" },
+-          { src: "/icon-192-maskable.png", type: "image/png", sizes: "192x192", purpose: "maskable" },
+-          { src: "/icon-512-maskable.png", type: "image/png", sizes: "512x512", purpose: "maskable" },
++          { src: "favicon.ico", type: "image/x-icon", sizes: "16x16 32x32" },
++          { src: "icon-192.png", type: "image/png", sizes: "192x192" },
++          { src: "icon-512.png", type: "image/png", sizes: "512x512" },
++          { src: "icon-192-maskable.png", type: "image/png", sizes: "192x192", purpose: "maskable" },
++          { src: "icon-512-maskable.png", type: "image/png", sizes: "512x512", purpose: "maskable" },
+         ],
+         lang: "en",
+         start_url: "/",
+@@ -77,11 +77,11 @@ export default defineConfig({
+         protocol_handlers: [
+           {
+             protocol: "web+nostr",
+-            url: "/l/%s",
++            url: "l/%s",
+           },
+           {
+             protocol: "nostr",
+-            url: "/l/%s",
++            url: "l/%s",
+           },
+         ],
+       },

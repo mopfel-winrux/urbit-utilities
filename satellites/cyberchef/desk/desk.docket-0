@@ -1,0 +1,10 @@
+:~  title+'CyberChef'
+    info+'The cyber Swiss army knife: encode, decode, analyse data'
+    color+0xf2.abee
+    image+'/cyberchef/icon.png'
+    version+[0 1 0]
+    website+'https://github.com/gchq/CyberChef'
+    license+'Apache-2.0'
+    base+'cyberchef'
+    site+/cyberchef
+==

@@ -1,0 +1,1355 @@
+diff --git a/excalidraw-app/ship/ShipPanel.scss b/excalidraw-app/ship/ShipPanel.scss
+new file mode 100644
+index 0000000..e7beb4c
+--- /dev/null
++++ b/excalidraw-app/ship/ShipPanel.scss
+@@ -0,0 +1,214 @@
++.excalidraw {
++  .ship-trigger svg {
++    width: 1rem;
++    height: 1rem;
++  }
++
++  .ship-sidebar__title {
++    font-weight: 700;
++    font-size: 1rem;
++    color: var(--color-primary);
++    padding-left: 0.25rem;
++  }
++
++  .ship-panel {
++    display: flex;
++    flex-direction: column;
++    gap: 1rem;
++    padding: 0 0.75rem 1rem;
++    overflow-y: auto;
++    font-size: 0.875rem;
++    color: var(--text-primary-color);
++
++    section {
++      display: flex;
++      flex-direction: column;
++      gap: 0.5rem;
++    }
++
++    &__row {
++      display: flex;
++      gap: 0.5rem;
++      align-items: center;
++    }
++
++    &__current strong {
++      word-break: break-all;
++    }
++
++    &__dirty {
++      color: var(--color-gray-50, #888);
++    }
++
++    &__check {
++      display: flex;
++      gap: 0.5rem;
++      align-items: center;
++      cursor: pointer;
++    }
++
++    &__heading {
++      display: flex;
++      justify-content: space-between;
++      align-items: center;
++      font-weight: 600;
++      border-top: 1px solid var(--default-border-color);
++      padding-top: 0.75rem;
++    }
++
++    &__label {
++      font-size: 0.75rem;
++      opacity: 0.7;
++    }
++
++    &__link {
++      display: flex;
++      gap: 0.5rem;
++      align-items: center;
++
++      a {
++        flex: 1;
++        min-width: 0;
++        overflow: hidden;
++        text-overflow: ellipsis;
++        white-space: nowrap;
++        color: var(--color-primary);
++      }
++    }
++
++    &__share {
++      display: flex;
++      flex-direction: column;
++      gap: 0.25rem;
++      padding: 0.5rem;
++      border-radius: var(--border-radius-lg, 8px);
++      background: var(--color-surface-low, rgba(0, 0, 0, 0.04));
++    }
++
++    &__status {
++      padding: 0.5rem;
++      border-radius: var(--border-radius-lg, 8px);
++      background: var(--color-surface-low, rgba(0, 0, 0, 0.04));
++
++      &.is-error {
++        color: var(--color-danger, #db6965);
++      }
++    }
++
++    &__empty {
++      opacity: 0.7;
++    }
++
++    &__conflict {
++      display: flex;
++      flex-direction: column;
++      gap: 0.5rem;
++      padding: 0.5rem;
++      border-radius: var(--border-radius-lg, 8px);
++      border: 1px solid var(--color-danger, #db6965);
++      background: var(--color-surface-low, rgba(0, 0, 0, 0.04));
++
++      .ship-btn {
++        text-align: left;
++      }
++    }
++
++    &__conflict-title {
++      font-weight: 600;
++      word-break: break-all;
++    }
++
++    &__list {
++      list-style: none;
++      margin: 0;
++      padding: 0;
++      display: flex;
++      flex-direction: column;
++      gap: 0.25rem;
++
++      li {
++        display: flex;
++        gap: 0.375rem;
++        align-items: center;
++        padding: 0.25rem 0.375rem;
++        border-radius: var(--border-radius-md, 6px);
++
++        &.is-current {
++          background: var(--color-surface-primary-container, rgba(105, 101, 219, 0.12));
++        }
++      }
++    }
++
++    &__item {
++      flex: 1;
++      min-width: 0;
++      display: flex;
++      flex-direction: column;
++    }
++
++    &__name {
++      overflow: hidden;
++      text-overflow: ellipsis;
++      white-space: nowrap;
++      color: inherit;
++    }
++
++    &__meta {
++      font-size: 0.75rem;
++      opacity: 0.65;
++    }
++  }
++
++  .ship-input {
++    flex: 1;
++    min-width: 0;
++    height: 2rem;
++    padding: 0 0.5rem;
++    border-radius: var(--border-radius-md, 6px);
++    border: 1px solid var(--default-border-color);
++    background: var(--input-bg-color, transparent);
++    color: var(--text-primary-color);
++    font: inherit;
++  }
++
++  .ship-btn {
++    height: 2rem;
++    padding: 0 0.75rem;
++    border-radius: var(--border-radius-md, 6px);
++    border: 1px solid var(--default-border-color);
++    background: var(--button-bg, var(--island-bg-color));
++    color: var(--text-primary-color);
++    font: inherit;
++    cursor: pointer;
++    white-space: nowrap;
++
++    &:hover:not(:disabled) {
++      background: var(--button-hover-bg, var(--color-surface-high));
++    }
++
++    &:disabled {
++      opacity: 0.5;
++      cursor: default;
++    }
++
++    &--primary {
++      background: var(--color-primary);
++      border-color: var(--color-primary);
++      color: var(--color-surface-lowest, #fff);
++
++      &:hover:not(:disabled) {
++        background: var(--color-primary-darker);
++      }
++    }
++
++    &--small {
++      height: 1.75rem;
++      padding: 0 0.5rem;
++      font-size: 0.8125rem;
++    }
++
++    &--danger {
++      color: var(--color-danger, #db6965);
++    }
++  }
++}
+diff --git a/excalidraw-app/ship/ShipPanel.tsx b/excalidraw-app/ship/ShipPanel.tsx
+new file mode 100644
+index 0000000..b9a7596
+--- /dev/null
++++ b/excalidraw-app/ship/ShipPanel.tsx
+@@ -0,0 +1,758 @@
++// "Save to ship" drawer: drawings stored on the user's Urbit ship through the
++// %utilities hub (see ./api.ts). Open, Save, Save as, Delete, optional
++// autosave, and read-only public share links.
++import { useCallback, useEffect, useRef, useState } from "react";
++import {
++  CaptureUpdateAction,
++  Sidebar,
++  hashElementsVersion,
++  loadFromBlob,
++  serializeAsJSON,
++} from "@excalidraw/excalidraw";
++import { copyTextToSystemClipboard } from "@excalidraw/excalidraw/clipboard";
++import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
++import {
++  ConflictError,
++  DRAWINGS_DIR,
++  SHARED_DIR,
++  deleteItem,
++  drawingPath,
++  getItem,
++  listItems,
++  nameFromPath,
++  publicUrl,
++  putItem,
++  sharePath,
++  viewerUrl,
++  cleanName,
++} from "./api";
++import type { PutCondition, StoreItem } from "./api";
++
++import "./ShipPanel.scss";
++
++export const SHIP_SIDEBAR = "ship";
++const LS_CURRENT = "excalidraw-ship-current";
++const LS_AUTOSAVE = "excalidraw-ship-autosave";
++const AUTOSAVE_DELAY = 3000;
++
++export const ShipIcon = (
++  <svg
++    viewBox="0 0 24 24"
++    fill="none"
++    stroke="currentColor"
++    strokeWidth="1.75"
++    strokeLinecap="round"
++    strokeLinejoin="round"
++    aria-hidden="true"
++  >
++    <path d="M7 18a4.6 4.4 0 0 1 0-9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
++    <path d="M9 15l3-3l3 3" />
++    <path d="M12 12v9" />
++  </svg>
++);
++
++type Current = {
++  path: string;
++  /** ship's ETag of the version we last opened or saved (null: unknown, e.g.
++   *  remembered by an older build, so the next save is create-only) */
++  etag: string | null;
++  /** scene signature at that time */
++  sig: string;
++};
++
++const readLS = <T,>(key: string, fallback: T): T => {
++  try {
++    const v = localStorage.getItem(key);
++    return v ? (JSON.parse(v) as T) : fallback;
++  } catch {
++    return fallback;
++  }
++};
++const writeLS = (key: string, value: unknown) => {
++  try {
++    if (value == null) {
++      localStorage.removeItem(key);
++    } else {
++      localStorage.setItem(key, JSON.stringify(value));
++    }
++  } catch {
++    // private mode etc.
++  }
++};
++
++const sceneSig = (api: ExcalidrawImperativeAPI) => {
++  const els = api.getSceneElements();
++  return `${hashElementsVersion(els)}:${els.length}:${
++    Object.keys(api.getFiles()).length
++  }:${api.getAppState().viewBackgroundColor}`;
++};
++
++const fmtDate = (ms: number) => {
++  try {
++    return new Date(ms).toLocaleString(undefined, {
++      dateStyle: "medium",
++      timeStyle: "short",
++    });
++  } catch {
++    return String(ms);
++  }
++};
++
++export const ShipTrigger = () => (
++  <Sidebar.Trigger
++    name={SHIP_SIDEBAR}
++    icon={ShipIcon}
++    title="Drawings on your ship"
++    className="ship-trigger"
++  >
++    Ship
++  </Sidebar.Trigger>
++);
++
++export const ShipPanel = ({
++  excalidrawAPI,
++}: {
++  excalidrawAPI: ExcalidrawImperativeAPI;
++}) => {
++  const [docked, setDocked] = useState(false);
++  const [current, setCurrentState] = useState<Current | null>(() =>
++    readLS<Current | null>(LS_CURRENT, null),
++  );
++  const [autosave, setAutosaveState] = useState<boolean>(() =>
++    readLS<boolean>(LS_AUTOSAVE, false),
++  );
++  const [dirty, setDirty] = useState(false);
++  const [drawings, setDrawings] = useState<StoreItem[] | null>(null);
++  const [shares, setShares] = useState<StoreItem[]>([]);
++  const [busy, setBusy] = useState(false);
++  const [status, setStatus] = useState<{ text: string; error?: boolean }>({
++    text: "",
++  });
++  const [saveAsOpen, setSaveAsOpen] = useState(false);
++  const [saveAsName, setSaveAsName] = useState("");
++  const [lastShare, setLastShare] = useState<string | null>(null);
++  const [open, setOpen] = useState(false);
++  /** a save got 412: the ship copy of this path isn't the version we had.
++   *  Autosave is paused until the user picks what to do. */
++  const [conflict, setConflictState] = useState<string | null>(null);
++  const conflictRef = useRef(conflict);
++
++  const currentRef = useRef(current);
++  currentRef.current = current;
++  const autosaveRef = useRef(autosave);
++  autosaveRef.current = autosave;
++  const savingRef = useRef(false);
++
++  const setCurrent = useCallback((c: Current | null) => {
++    currentRef.current = c;
++    setCurrentState(c);
++    writeLS(LS_CURRENT, c);
++  }, []);
++  const setConflict = useCallback((path: string | null) => {
++    conflictRef.current = path;
++    setConflictState(path);
++  }, []);
++  const setAutosave = (v: boolean) => {
++    setAutosaveState(v);
++    writeLS(LS_AUTOSAVE, v);
++  };
++
++  const report = (text: string, error = false) => setStatus({ text, error });
++
++  const refresh = useCallback(async () => {
++    try {
++      const [d, s] = await Promise.all([
++        listItems(DRAWINGS_DIR),
++        listItems(SHARED_DIR),
++      ]);
++      d.sort((a, b) => b.modified - a.modified);
++      s.sort((a, b) => b.modified - a.modified);
++      setDrawings(d);
++      setShares(s);
++    } catch (e: any) {
++      report(e.message, true);
++    }
++  }, []);
++
++  useEffect(() => {
++    if (open) {
++      refresh();
++    }
++  }, [open, refresh]);
++
++  /** write the scene to `path` (throws ConflictError on 412); returns the
++   *  new Current */
++  const writeScene = useCallback(
++    async (path: string, cond: PutCondition) => {
++      const sig = sceneSig(excalidrawAPI);
++      const json = serializeAsJSON(
++        excalidrawAPI.getSceneElements(),
++        { ...excalidrawAPI.getAppState(), name: nameFromPath(path) },
++        excalidrawAPI.getFiles(),
++        "local",
++      );
++      const { etag } = await putItem(path, json, { cond });
++      const c = { path, etag, sig };
++      setCurrent(c);
++      setDirty(sceneSig(excalidrawAPI) !== sig);
++      return c;
++    },
++    [excalidrawAPI, setCurrent],
++  );
++
++  const run = async (fn: () => Promise<void>) => {
++    setBusy(true);
++    try {
++      await fn();
++    } catch (e: any) {
++      report(e.message || String(e), true);
++    } finally {
++      setBusy(false);
++    }
++  };
++
++  /** the condition that makes a save never overwrite someone else's: the
++   *  version we opened or last saved, or create-only for a new name */
++  const condFor = (path: string): PutCondition => {
++    const cur = currentRef.current;
++    return cur && cur.path === path && cur.etag
++      ? { ifMatch: cur.etag }
++      : { create: true };
++  };
++
++  const enterConflict = (path: string) => {
++    setConflict(path);
++    report(
++      `"${nameFromPath(path)}" was changed on your ship since you opened it. ` +
++        "Nothing was overwritten. Choose what to keep below.",
++      true,
++    );
++  };
++
++  const saved = async (path: string, verb = "Saved") => {
++    excalidrawAPI.updateScene({
++      appState: { name: nameFromPath(path) },
++      captureUpdate: CaptureUpdateAction.NEVER,
++    });
++    setSaveAsOpen(false);
++    report(`${verb} "${nameFromPath(path)}" to your ship.`);
++    excalidrawAPI.setToast({ message: "Saved to your ship", duration: 2000 });
++    await refresh();
++  };
++
++  /** cond `undefined` = the safe default from condFor */
++  const saveTo = (path: string, cond?: PutCondition) =>
++    run(async () => {
++      const c = cond === undefined ? condFor(path) : cond;
++      savingRef.current = true;
++      try {
++        await writeScene(path, c);
++      } catch (e) {
++        if (!(e instanceof ConflictError)) {
++          throw e;
++        }
++        const cur = currentRef.current;
++        if (c && "ifMatch" in c) {
++          // the drawing we have open was changed elsewhere
++          enterConflict(path);
++          return;
++        }
++        // create-only: a drawing with this name already exists
++        if (cur && cur.path === path) {
++          // ours, but we don't know which version we had
++          enterConflict(path);
++          return;
++        }
++        if (
++          !window.confirm(
++            `"${nameFromPath(path)}" already exists on your ship. Replace it?`,
++          )
++        ) {
++          report(`Not saved: "${nameFromPath(path)}" already exists.`, true);
++          return;
++        }
++        await writeScene(path, null);
++      } finally {
++        savingRef.current = false;
++      }
++      // overwriting theirs, or saving mine elsewhere ("save mine as a copy",
++      // which makes the copy the current file), resolves a conflict
++      setConflict(null);
++      await saved(path);
++    });
++
++  /** conflict: replace the ship copy with this drawing */
++  const onOverwriteTheirs = () => {
++    const path = conflictRef.current;
++    if (path) {
++      saveTo(path, null);
++    }
++  };
++
++  /** conflict: keep my drawing under a new name */
++  const onSaveCopy = () => {
++    const path = conflictRef.current;
++    if (path) {
++      setSaveAsName(`${nameFromPath(path)} (my copy)`);
++      setSaveAsOpen(true);
++    }
++  };
++
++  /** conflict: drop my changes and load the ship's version */
++  const onLoadTheirs = () => {
++    const path = conflictRef.current;
++    if (path) {
++      loadDrawing(path, true);
++    }
++  };
++
++  const onSave = () => {
++    if (current) {
++      saveTo(current.path);
++    } else {
++      setSaveAsName(cleanName(excalidrawAPI.getName()));
++      setSaveAsOpen(true);
++    }
++  };
++
++  const onSaveAs = () => {
++    const name = cleanName(saveAsName);
++    if (!name) {
++      report("Enter a name for the drawing.", true);
++      return;
++    }
++    saveTo(drawingPath(name));
++  };
++
++  const loadDrawing = (path: string, discard = false) =>
++    run(async () => {
++      const hasContent = excalidrawAPI.getSceneElements().length > 0;
++      if (
++        !discard &&
++        hasContent &&
++        (dirty || !current) &&
++        !window.confirm(
++          "Your current drawing has changes that aren't saved to the ship. Discard them?",
++        )
++      ) {
++        return;
++      }
++      const { blob, etag } = await getItem(path);
++      const data = await loadFromBlob(blob, null, null);
++      const name = nameFromPath(path);
++      excalidrawAPI.addFiles(Object.values(data.files || {}));
++      excalidrawAPI.updateScene({
++        elements: data.elements,
++        appState: {
++          name,
++          viewBackgroundColor: data.appState.viewBackgroundColor,
++        },
++        captureUpdate: CaptureUpdateAction.IMMEDIATELY,
++      });
++      excalidrawAPI.scrollToContent(undefined, { fitToContent: true });
++      setCurrent({ path, etag, sig: sceneSig(excalidrawAPI) });
++      setDirty(false);
++      setConflict(null);
++      report(`Opened "${name}".`);
++    });
++
++  const onOpen = (item: StoreItem) => loadDrawing(item.path);
++
++  const onDelete = (item: StoreItem) =>
++    run(async () => {
++      if (
++        !window.confirm(`Delete "${nameFromPath(item.path)}" from your ship?`)
++      ) {
++        return;
++      }
++      await deleteItem(item.path);
++      if (currentRef.current?.path === item.path) {
++        setCurrent(null);
++      }
++      if (conflictRef.current === item.path) {
++        setConflict(null);
++      }
++      report(`Deleted "${nameFromPath(item.path)}".`);
++      await refresh();
++    });
++
++  const onShare = () =>
++    run(async () => {
++      if (!excalidrawAPI.getSceneElements().length) {
++        report("Nothing to share: the canvas is empty.", true);
++        return;
++      }
++      const name = current ? nameFromPath(current.path) : excalidrawAPI.getName();
++      const path = sharePath(name);
++      const json = serializeAsJSON(
++        excalidrawAPI.getSceneElements(),
++        { ...excalidrawAPI.getAppState(), name },
++        excalidrawAPI.getFiles(),
++        "local",
++      );
++      await putItem(path, json, { public: true });
++      setLastShare(path);
++      report("Read-only snapshot shared. Anyone with the link can view it.");
++      await refresh();
++    });
++
++  const onRevoke = (item: StoreItem) =>
++    run(async () => {
++      if (!window.confirm("Stop sharing this snapshot? The link will stop working.")) {
++        return;
++      }
++      await deleteItem(item.path);
++      if (lastShare === item.path) {
++        setLastShare(null);
++      }
++      await refresh();
++    });
++
++  const copy = async (text: string) => {
++    try {
++      await copyTextToSystemClipboard(text);
++      excalidrawAPI.setToast({ message: "Link copied", duration: 1500 });
++    } catch {
++      window.prompt("Copy this link", text);
++    }
++  };
++
++  // dirty tracking + autosave (only to the file already open from / saved to
++  // the ship, and never over another version: the PUT is conditional on the
++  // ETag we have, and a 412 pauses autosave until the conflict is resolved)
++  useEffect(() => {
++    let timer: number | undefined;
++    const tick = async () => {
++      const cur = currentRef.current;
++      if (
++        !cur ||
++        !autosaveRef.current ||
++        savingRef.current ||
++        conflictRef.current
++      ) {
++        return;
++      }
++      if (sceneSig(excalidrawAPI) === cur.sig) {
++        return;
++      }
++      savingRef.current = true;
++      try {
++        await writeScene(
++          cur.path,
++          cur.etag ? { ifMatch: cur.etag } : { create: true },
++        );
++        report(`Autosaved "${nameFromPath(cur.path)}" at ${fmtDate(Date.now())}.`);
++      } catch (e: any) {
++        if (e instanceof ConflictError) {
++          setConflict(cur.path);
++          report(
++            `Autosave paused: "${nameFromPath(
++              cur.path,
++            )}" was changed on your ship by someone else. Nothing was overwritten. Choose what to keep below.`,
++            true,
++          );
++          excalidrawAPI.setToast({
++            message: "Autosave paused: the drawing was changed on your ship",
++            duration: 4000,
++          });
++          excalidrawAPI.updateScene({
++            appState: { openSidebar: { name: SHIP_SIDEBAR } },
++            captureUpdate: CaptureUpdateAction.NEVER,
++          });
++          return;
++        }
++        report(`Autosave failed: ${e.message}`, true);
++      } finally {
++        savingRef.current = false;
++      }
++    };
++    const unsub = excalidrawAPI.onChange(() => {
++      const cur = currentRef.current;
++      const isDirty = cur
++        ? sceneSig(excalidrawAPI) !== cur.sig
++        : excalidrawAPI.getSceneElements().length > 0;
++      setDirty((d) => (d === isDirty ? d : isDirty));
++      if (cur && autosaveRef.current && isDirty) {
++        window.clearTimeout(timer);
++        timer = window.setTimeout(tick, AUTOSAVE_DELAY);
++      }
++    });
++    return () => {
++      unsub();
++      window.clearTimeout(timer);
++    };
++  }, [excalidrawAPI, writeScene, setConflict]);
++
++  const curName = current ? nameFromPath(current.path) : null;
++
++  return (
++    <Sidebar
++      name={SHIP_SIDEBAR}
++      docked={docked}
++      onDock={setDocked}
++      className="ship-sidebar"
++      onStateChange={(s) => setOpen(!!s)}
++    >
++      <Sidebar.Header>
++        <div className="ship-sidebar__title">Your ship</div>
++      </Sidebar.Header>
++      <div className="ship-panel" data-testid="ship-panel">
++        <section>
++          <div className="ship-panel__current" data-testid="ship-current">
++            {curName ? (
++              <>
++                Saved as <strong>{curName}</strong>
++                {dirty && <span className="ship-panel__dirty"> (unsaved changes)</span>}
++              </>
++            ) : (
++              <>Not saved to your ship yet</>
++            )}
++          </div>
++          <div className="ship-panel__row">
++            <button
++              className="ship-btn ship-btn--primary"
++              disabled={busy}
++              onClick={onSave}
++              data-testid="ship-save"
++            >
++              Save
++            </button>
++            <button
++              className="ship-btn"
++              disabled={busy}
++              onClick={() => {
++                setSaveAsName(curName || cleanName(excalidrawAPI.getName()));
++                setSaveAsOpen((v) => !v);
++              }}
++              data-testid="ship-saveas"
++            >
++              Save as…
++            </button>
++          </div>
++          {saveAsOpen && (
++            <form
++              className="ship-panel__row"
++              onSubmit={(e) => {
++                e.preventDefault();
++                onSaveAs();
++              }}
++            >
++              <input
++                className="ship-input"
++                autoFocus
++                value={saveAsName}
++                placeholder="Drawing name"
++                onChange={(e) => setSaveAsName(e.target.value)}
++                onKeyDown={(e) => e.stopPropagation()}
++                data-testid="ship-name"
++              />
++              <button
++                type="submit"
++                className="ship-btn ship-btn--primary"
++                disabled={busy}
++                data-testid="ship-saveas-confirm"
++              >
++                Save
++              </button>
++            </form>
++          )}
++          <label
++            className="ship-panel__check"
++            title={
++              curName
++                ? "Save changes to this drawing on your ship automatically"
++                : "Save the drawing to your ship first"
++            }
++          >
++            <input
++              type="checkbox"
++              checked={autosave}
++              disabled={!curName}
++              onChange={(e) => setAutosave(e.target.checked)}
++              data-testid="ship-autosave"
++            />
++            Autosave to ship
++          </label>
++        </section>
++
++        <section>
++          <button
++            className="ship-btn"
++            disabled={busy}
++            onClick={onShare}
++            data-testid="ship-share"
++          >
++            Share read-only link
++          </button>
++          {lastShare && (
++            <div className="ship-panel__share" data-testid="ship-share-result">
++              <div className="ship-panel__label">Viewer link</div>
++              <div className="ship-panel__link">
++                <a
++                  href={viewerUrl(lastShare)}
++                  target="_blank"
++                  rel="noopener noreferrer"
++                  data-testid="ship-share-viewer"
++                >
++                  {viewerUrl(lastShare)}
++                </a>
++                <button className="ship-btn ship-btn--small" onClick={() => copy(viewerUrl(lastShare))}>
++                  Copy
++                </button>
++              </div>
++              <div className="ship-panel__label">Raw file</div>
++              <div className="ship-panel__link">
++                <a
++                  href={publicUrl(lastShare)}
++                  target="_blank"
++                  rel="noopener noreferrer"
++                  data-testid="ship-share-pub"
++                >
++                  {publicUrl(lastShare)}
++                </a>
++                <button className="ship-btn ship-btn--small" onClick={() => copy(publicUrl(lastShare))}>
++                  Copy
++                </button>
++              </div>
++            </div>
++          )}
++        </section>
++
++        {status.text && (
++          <div
++            className={`ship-panel__status${status.error ? " is-error" : ""}`}
++            data-testid="ship-status"
++          >
++            {status.text}
++          </div>
++        )}
++
++        {conflict && (
++          <div
++            className="ship-panel__conflict"
++            role="alert"
++            data-testid="ship-conflict"
++          >
++            <div className="ship-panel__conflict-title">
++              Save conflict on <strong>{nameFromPath(conflict)}</strong>
++            </div>
++            <div>
++              Someone saved a different version on your ship.
++              {autosave && " Autosave is paused until you choose."}
++            </div>
++            <button
++              className="ship-btn ship-btn--danger"
++              disabled={busy}
++              onClick={onOverwriteTheirs}
++              data-testid="ship-conflict-overwrite"
++            >
++              Overwrite theirs with mine
++            </button>
++            <button
++              className="ship-btn"
++              disabled={busy}
++              onClick={onSaveCopy}
++              data-testid="ship-conflict-copy"
++            >
++              Save mine as a copy…
++            </button>
++            <button
++              className="ship-btn"
++              disabled={busy}
++              onClick={onLoadTheirs}
++              data-testid="ship-conflict-load"
++            >
++              Discard mine, load theirs
++            </button>
++          </div>
++        )}
++
++        <section>
++          <div className="ship-panel__heading">
++            Drawings
++            <button
++              className="ship-btn ship-btn--small"
++              onClick={refresh}
++              disabled={busy}
++              data-testid="ship-refresh"
++            >
++              Refresh
++            </button>
++          </div>
++          {drawings === null ? (
++            <div className="ship-panel__empty">Loading…</div>
++          ) : drawings.length === 0 ? (
++            <div className="ship-panel__empty">No drawings on your ship yet.</div>
++          ) : (
++            <ul className="ship-panel__list" data-testid="ship-list">
++              {drawings.map((d) => (
++                <li
++                  key={d.path}
++                  className={d.path === current?.path ? "is-current" : ""}
++                  data-path={d.path}
++                >
++                  <div className="ship-panel__item">
++                    <span className="ship-panel__name">{nameFromPath(d.path)}</span>
++                    <span className="ship-panel__meta">{fmtDate(d.modified)}</span>
++                  </div>
++                  <button
++                    className="ship-btn ship-btn--small"
++                    disabled={busy}
++                    onClick={() => onOpen(d)}
++                    data-testid="ship-open"
++                  >
++                    Open
++                  </button>
++                  <button
++                    className="ship-btn ship-btn--small ship-btn--danger"
++                    disabled={busy}
++                    onClick={() => onDelete(d)}
++                    data-testid="ship-delete"
++                  >
++                    Delete
++                  </button>
++                </li>
++              ))}
++            </ul>
++          )}
++        </section>
++
++        {shares.length > 0 && (
++          <section>
++            <div className="ship-panel__heading">Shared links</div>
++            <ul className="ship-panel__list" data-testid="ship-shares">
++              {shares.map((s) => (
++                <li key={s.path} data-path={s.path}>
++                  <div className="ship-panel__item">
++                    <a
++                      className="ship-panel__name"
++                      href={viewerUrl(s.path)}
++                      target="_blank"
++                      rel="noopener noreferrer"
++                    >
++                      {nameFromPath(s.path).replace(/-[0-9a-f]{24}$/, "")}
++                    </a>
++                    <span className="ship-panel__meta">{fmtDate(s.modified)}</span>
++                  </div>
++                  <button
++                    className="ship-btn ship-btn--small"
++                    onClick={() => copy(viewerUrl(s.path))}
++                  >
++                    Copy
++                  </button>
++                  <button
++                    className="ship-btn ship-btn--small ship-btn--danger"
++                    disabled={busy}
++                    onClick={() => onRevoke(s)}
++                  >
++                    Revoke
++                  </button>
++                </li>
++              ))}
++            </ul>
++          </section>
++        )}
++      </div>
++    </Sidebar>
++  );
++};
+diff --git a/excalidraw-app/ship/api.ts b/excalidraw-app/ship/api.ts
+new file mode 100644
+index 0000000..f89022c
+--- /dev/null
++++ b/excalidraw-app/ship/api.ts
+@@ -0,0 +1,194 @@
++// Client for the %utilities hub storage API (kit/CONTRACT.md), same origin,
++// authenticated by the ship's login cookie.
++//   GET    /utilities/api/store/excalidraw/?prefix=<dir>/   list
++//   GET    /utilities/api/store/excalidraw/<path>           read
++//   PUT    /utilities/api/store/excalidraw/<path>           write
++//          (x-utilities-public: true -> readable at /utilities/pub/...)
++//          If-Match: <etag> -> 412 unless the item is still that version
++//          If-None-Match: * -> 412 if the item exists (create only)
++//   GET/PUT responses carry the item's strong ETag
++//   DELETE /utilities/api/store/excalidraw/<path>           delete
++//   GET    /utilities/pub/excalidraw/<path>                 public read, no login
++
++export const DESK = "excalidraw";
++const API = `/utilities/api/store/${DESK}/`;
++const PUB = `/utilities/pub/${DESK}/`;
++
++export const DRAWINGS_DIR = "drawings/";
++export const SHARED_DIR = "shared/";
++export const EXT = ".excalidraw";
++export const MIME = "application/vnd.excalidraw+json";
++
++export type StoreItem = {
++  path: string;
++  type: string;
++  size: number;
++  modified: number;
++  public: boolean;
++  burn: boolean;
++  expires: number | null;
++};
++
++export const encodePath = (path: string) =>
++  path.split("/").map(encodeURIComponent).join("/");
++
++const fail = async (res: Response, what: string): Promise<never> => {
++  if (res.status === 401 || res.status === 403) {
++    throw new Error(`${what}: not logged in to your ship`);
++  }
++  throw new Error(`${what}: ${res.status} ${res.statusText}`);
++};
++
++export const listItems = async (prefix: string): Promise<StoreItem[]> => {
++  const res = await fetch(`${API}?prefix=${encodeURIComponent(prefix)}`, {
++    credentials: "same-origin",
++    cache: "no-store",
++  });
++  if (!res.ok) {
++    return fail(res, "list");
++  }
++  const rows = (await res.json()) as StoreItem[];
++  return rows.filter((r) => r.path.startsWith(prefix));
++};
++
++/** the item was changed (If-Match) or already exists (If-None-Match: *) */
++export class ConflictError extends Error {
++  constructor(public path: string) {
++    super(`"${nameFromPath(path)}" was changed on your ship`);
++  }
++}
++
++export const getItem = async (
++  path: string,
++): Promise<{ blob: Blob; etag: string | null }> => {
++  const res = await fetch(API + encodePath(path), {
++    credentials: "same-origin",
++    cache: "no-store",
++  });
++  if (!res.ok) {
++    return fail(res, "open");
++  }
++  return { blob: await res.blob(), etag: res.headers.get("etag") };
++};
++
++/** current ETag of an item, or null if it doesn't exist */
++export const headItem = async (path: string): Promise<string | null> => {
++  const res = await fetch(API + encodePath(path), {
++    method: "HEAD",
++    credentials: "same-origin",
++    cache: "no-store",
++  });
++  if (res.status === 404) {
++    return null;
++  }
++  if (!res.ok) {
++    return fail(res, "check");
++  }
++  return res.headers.get("etag");
++};
++
++export type PutCondition =
++  /** only if the item is still this version */
++  | { ifMatch: string }
++  /** only if the item doesn't exist yet */
++  | { create: true }
++  /** unconditional */
++  | null;
++
++/** PUT; throws ConflictError on 412. Returns the new item's ETag. */
++export const putItem = async (
++  path: string,
++  body: string,
++  opts: { public?: boolean; cond?: PutCondition } = {},
++): Promise<{ etag: string | null }> => {
++  const headers: Record<string, string> = { "content-type": MIME };
++  if (opts.public) {
++    headers["x-utilities-public"] = "true";
++  }
++  const cond = opts.cond;
++  if (cond && "ifMatch" in cond) {
++    headers["if-match"] = cond.ifMatch;
++  } else if (cond && "create" in cond) {
++    headers["if-none-match"] = "*";
++  }
++  const res = await fetch(API + encodePath(path), {
++    method: "PUT",
++    credentials: "same-origin",
++    headers,
++    body,
++  });
++  if (res.status === 412) {
++    await res.arrayBuffer().catch(() => undefined);
++    throw new ConflictError(path);
++  }
++  if (!res.ok) {
++    return fail(res, "save");
++  }
++  await res.arrayBuffer().catch(() => undefined);
++  // the hub sends the new ETag; ask for it if a proxy dropped it
++  return { etag: res.headers.get("etag") ?? (await headItem(path)) };
++};
++
++export const deleteItem = async (path: string): Promise<void> => {
++  const res = await fetch(API + encodePath(path), {
++    method: "DELETE",
++    credentials: "same-origin",
++  });
++  // drain the (empty) body so the request completes cleanly
++  await res.arrayBuffer().catch(() => undefined);
++  if (!res.ok && res.status !== 404) {
++    return fail(res, "delete");
++  }
++};
++
++export const publicUrl = (path: string) =>
++  `${window.location.origin}${PUB}${encodePath(path)}`;
++
++/** read-only viewer page, public sub-path of this desk */
++export const viewerUrl = (path: string) =>
++  `${window.location.origin}/${DESK}/view/#${encodePath(path)}`;
++
++export const fetchPublic = async (path: string): Promise<Blob> => {
++  const res = await fetch(PUB + encodePath(path), {
++    credentials: "omit",
++    cache: "no-store",
++  });
++  if (!res.ok) {
++    throw new Error(
++      res.status === 404
++        ? "This drawing doesn't exist or is no longer shared."
++        : `Couldn't load the drawing (${res.status}).`,
++    );
++  }
++  return res.blob();
++};
++
++/** drawing name -> store path; names keep their spelling, minus separators */
++export const cleanName = (name: string) =>
++  name
++    .replace(/[\\/\u0000-\u001f\u007f]+/g, " ")
++    .replace(/\.excalidraw$/i, "")
++    .replace(/^\.+/, "")
++    .trim()
++    .slice(0, 120);
++
++export const drawingPath = (name: string) => DRAWINGS_DIR + cleanName(name) + EXT;
++
++export const nameFromPath = (path: string) =>
++  path.slice(path.lastIndexOf("/") + 1).replace(/\.excalidraw$/, "");
++
++export const randomId = () => {
++  const b = new Uint8Array(12);
++  crypto.getRandomValues(b);
++  return Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
++};
++
++export const sharePath = (name: string) => {
++  const slug =
++    cleanName(name)
++      .toLowerCase()
++      .replace(/[^a-z0-9]+/g, "-")
++      .replace(/^-+|-+$/g, "")
++      .slice(0, 40) || "drawing";
++  return `${SHARED_DIR}${slug}-${randomId()}${EXT}`;
++};
+diff --git a/excalidraw-app/view/index.html b/excalidraw-app/view/index.html
+new file mode 100644
+index 0000000..d9e00e5
+--- /dev/null
++++ b/excalidraw-app/view/index.html
+@@ -0,0 +1,49 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <title>Excalidraw (read-only)</title>
++    <meta
++      name="viewport"
++      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, shrink-to-fit=no"
++    />
++    <meta name="referrer" content="no-referrer" />
++    <meta name="robots" content="noindex" />
++    <link
++      rel="icon"
++      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%236965db'/%3E%3Cpath d='M8 23l11-11 3 3-11 11H8z' fill='%23fff'/%3E%3C/svg%3E"
++    />
++    <script>
++      // fonts are vendored under /excalidraw/view/fonts
++      window.EXCALIDRAW_ASSET_PATH = "/";
++      window.name = "_excalidraw_view";
++    </script>
++    <link rel="stylesheet" href="../../packages/excalidraw/fonts/fonts.css" type="text/css" />
++    <style>
++      body,
++      html {
++        margin: 0;
++        width: 100%;
++        height: 100%;
++        overflow: hidden;
++      }
++      #root {
++        height: 100%;
++      }
++      .view-message {
++        display: flex;
++        align-items: center;
++        justify-content: center;
++        height: 100%;
++        font-family: Assistant, system-ui, sans-serif;
++        color: #555;
++        padding: 1rem;
++        text-align: center;
++      }
++    </style>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="./main.tsx"></script>
++  </body>
++</html>
+diff --git a/excalidraw-app/view/main.tsx b/excalidraw-app/view/main.tsx
+new file mode 100644
+index 0000000..21c9aa1
+--- /dev/null
++++ b/excalidraw-app/view/main.tsx
+@@ -0,0 +1,110 @@
++// Minimal read-only viewer for drawings shared from the ship. Public route
++// (/excalidraw/view/ is a public sub-path of the desk): no login, no local
++// storage, no ship API besides the public read
++//   GET /utilities/pub/excalidraw/<path>
++// The path is in the URL fragment: /excalidraw/view/#shared/<name>.excalidraw
++import { StrictMode, useEffect, useState } from "react";
++import { createRoot } from "react-dom/client";
++import { Excalidraw, MainMenu, loadFromBlob } from "@excalidraw/excalidraw";
++import type { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
++import { fetchPublic } from "../ship/api";
++
++const pathFromHash = () => {
++  let p = window.location.hash.replace(/^#/, "");
++  try {
++    p = decodeURIComponent(p);
++  } catch {
++    return null;
++  }
++  return /^shared\/[^/]+\.excalidraw$/.test(p) ? p : null;
++};
++
++const Viewer = () => {
++  const [state, setState] = useState<
++    | { kind: "loading" }
++    | { kind: "error"; message: string }
++    | { kind: "ready"; data: ExcalidrawInitialDataState; name: string }
++  >({ kind: "loading" });
++
++  useEffect(() => {
++    const path = pathFromHash();
++    if (!path) {
++      setState({ kind: "error", message: "No shared drawing in this link." });
++      return;
++    }
++    (async () => {
++      try {
++        const blob = await fetchPublic(path);
++        const data = await loadFromBlob(blob, null, null);
++        const name = data.appState.name || "Shared drawing";
++        document.title = `${name} · Excalidraw (read-only)`;
++        setState({
++          kind: "ready",
++          name,
++          data: {
++            elements: data.elements,
++            files: data.files,
++            appState: {
++              viewBackgroundColor: data.appState.viewBackgroundColor,
++              name,
++            },
++            scrollToContent: true,
++          },
++        });
++      } catch (e: any) {
++        setState({ kind: "error", message: e.message || String(e) });
++      }
++    })();
++  }, []);
++
++  if (state.kind === "loading") {
++    return <div className="view-message">Loading drawing…</div>;
++  }
++  if (state.kind === "error") {
++    return (
++      <div className="view-message" data-testid="view-error">
++        {state.message}
++      </div>
++    );
++  }
++  return (
++    <div
++      style={{ height: "100%" }}
++      data-testid="viewer"
++      data-elements={
++        (state.data.elements || []).filter((e) => !e.isDeleted).length
++      }
++    >
++      <Excalidraw
++        initialData={state.data}
++        viewModeEnabled={true}
++        zenModeEnabled={false}
++        name={state.name}
++        UIOptions={{
++          canvasActions: {
++            changeViewBackgroundColor: false,
++            clearCanvas: false,
++            export: false,
++            loadScene: false,
++            saveToActiveFile: false,
++            saveAsImage: true,
++            toggleTheme: true,
++          },
++          tools: { image: false },
++        }}
++      >
++        <MainMenu>
++          <MainMenu.DefaultItems.SaveAsImage />
++          <MainMenu.DefaultItems.ToggleTheme />
++          <MainMenu.DefaultItems.Help />
++        </MainMenu>
++      </Excalidraw>
++    </div>
++  );
++};
++
++createRoot(document.getElementById("root")!).render(
++  <StrictMode>
++    <Viewer />
++  </StrictMode>,
++);

@@ -1,0 +1,10 @@
+:~  title+'Utilities'
+    info+'Launch, install and manage browser apps served from your ship, and the files they save.'
+    color+0x2a.6df4
+    image+'/utilities/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/'
+    license+'MIT'
+    base+'utilities'
+    site+/utilities
+==

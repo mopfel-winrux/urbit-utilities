@@ -1,0 +1,10 @@
+:~  title+'Networking Toolbox'
+    info+'Offline-first subnet, IP, DNS and networking calculators'
+    color+0xf2.abee
+    image+'/nettools/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/Lissy93/networking-toolbox'
+    license+'MIT'
+    base+'nettools'
+    site+/nettools
+==

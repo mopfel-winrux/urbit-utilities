@@ -1,0 +1,40 @@
+diff --git a/src/lib/components/DesktopEditor.svelte b/src/lib/components/DesktopEditor.svelte
+index b3c52ece..c27161ce 100644
+--- a/src/lib/components/DesktopEditor.svelte
++++ b/src/lib/components/DesktopEditor.svelte
+@@ -117,7 +117,7 @@
+ 
+     monaco.json.jsonDefaults.setDiagnosticsOptions({
+       validate: true,
+-      enableSchemaRequest: true,
++      enableSchemaRequest: false,
+       schemas: [
+         {
+           fileMatch: ['config.json'],
+diff --git a/static/manifest.json b/static/manifest.json
+index 65d47767..31569967 100644
+--- a/static/manifest.json
++++ b/static/manifest.json
+@@ -3,7 +3,7 @@
+ 	"name": "Mermaid Live Editor",
+ 	"icons": [
+ 		{
+-			"src": "/favicon.png",
++			"src": "favicon.png",
+ 			"type": "image/png",
+ 			"sizes": "512x512"
+ 		}
+diff --git a/svelte.config.js b/svelte.config.js
+index 35715b63..8000e2db 100644
+--- a/svelte.config.js
++++ b/svelte.config.js
+@@ -12,7 +12,8 @@ const config = {
+       '$/*': './src/lib/*'
+     },
+     paths: {
+-      base: process.env.MERMAID_BASE_PATH ?? ''
++      base: process.env.MERMAID_BASE_PATH ?? '',
++      relative: false
+     },
+     adapter: adapter({
+       pages: 'docs',

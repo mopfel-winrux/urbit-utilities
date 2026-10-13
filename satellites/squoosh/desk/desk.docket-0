@@ -1,0 +1,10 @@
+:~  title+'Squoosh'
+    info+'Compress images with codecs compiled to WebAssembly'
+    color+0xf2.abee
+    image+'/squoosh/icon.png'
+    version+[0 1 0]
+    website+'https://github.com/GoogleChromeLabs/squoosh'
+    license+'Apache-2.0'
+    base+'squoosh'
+    site+/squoosh
+==

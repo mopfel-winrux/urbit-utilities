@@ -1,0 +1,26 @@
+# fake ships and their secrets
+nus/
+lud/
+.ship-cookie
+.ship-code
+.lud-code
+.lud-cookie
+.publish/
+
+# build output: everything below is reproduced by tools/build-all.sh
+satellites/*/upstream/
+satellites/*/desk/web/
+satellites/*/out/
+satellites/*/node_modules/
+satellites/*/*.png
+!satellites/*/icon.png
+hub/desk/web/icons/*.svg
+hub/desk/web/icons/*.png
+
+# tests
+test/node_modules/
+test/out/
+test/logs/
+test/log-*.txt
+__pycache__/
+build/

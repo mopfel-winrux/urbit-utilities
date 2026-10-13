@@ -1,0 +1,177 @@
+[
+ {
+  "desk": "vert",
+  "title": "VERT",
+  "info": "Convert images, audio, video and documents in your browser",
+  "category": "files",
+  "tier": 1
+ },
+ {
+  "desk": "bentopdf",
+  "title": "BentoPDF",
+  "info": "Merge, split, compress, sign and convert PDFs locally",
+  "category": "files",
+  "tier": 1
+ },
+ {
+  "desk": "omni-tools",
+  "title": "Omni Tools",
+  "info": "Everyday image, video, PDF, text and list utilities",
+  "category": "files",
+  "tier": 1
+ },
+ {
+  "desk": "mazanoke",
+  "title": "Mazanoke",
+  "info": "Compress and convert images in your browser",
+  "category": "files",
+  "tier": 1
+ },
+ {
+  "desk": "squoosh",
+  "title": "Squoosh",
+  "info": "Compress images with codecs compiled to WebAssembly",
+  "category": "graphics",
+  "tier": 1
+ },
+ {
+  "desk": "minipaint",
+  "title": "miniPaint",
+  "info": "Image editor with layers, filters and effects",
+  "category": "graphics",
+  "tier": 1
+ },
+ {
+  "desk": "drawio",
+  "title": "draw.io",
+  "info": "Diagrams, flowcharts and whiteboards",
+  "category": "graphics",
+  "tier": 1
+ },
+ {
+  "desk": "fossflow",
+  "title": "FossFLOW",
+  "info": "Isometric infrastructure diagrams",
+  "category": "graphics",
+  "tier": 1
+ },
+ {
+  "desk": "mermaid",
+  "title": "Mermaid Live",
+  "info": "Diagrams from text with live preview",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "it-tools",
+  "title": "IT Tools",
+  "info": "Handy tools for developers: encoders, hashes, converters",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "cyberchef",
+  "title": "CyberChef",
+  "info": "The cyber Swiss army knife: encode, decode, analyse data",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "nettools",
+  "title": "Networking Toolbox",
+  "info": "Offline-first subnet, IP, DNS and networking calculators",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "sqlime",
+  "title": "Sqlime",
+  "info": "SQLite playground running entirely in the browser",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "typst",
+  "title": "Typst",
+  "info": "Typeset documents with Typst, compiled in the browser",
+  "category": "productivity",
+  "tier": 1
+ },
+ {
+  "desk": "mqttx",
+  "title": "MQTTX Web",
+  "info": "MQTT client over WebSockets",
+  "category": "developer",
+  "tier": 1
+ },
+ {
+  "desk": "snort",
+  "title": "Snort",
+  "info": "Fast Nostr client",
+  "category": "social",
+  "tier": 1
+ },
+ {
+  "desk": "nostrudel",
+  "title": "noStrudel",
+  "info": "A sandbox for exploring Nostr",
+  "category": "social",
+  "tier": 1
+ },
+ {
+  "desk": "emulatorjs",
+  "title": "EmulatorJS",
+  "info": "Retro game consoles in the browser",
+  "category": "games",
+  "tier": 1
+ },
+ {
+  "desk": "jsdos",
+  "title": "js-dos",
+  "info": "DOS games and programs in the browser",
+  "category": "games",
+  "tier": 1
+ },
+ {
+  "desk": "excalidraw",
+  "title": "Excalidraw",
+  "info": "Hand-drawn style whiteboard, saved to your ship",
+  "category": "graphics",
+  "tier": 2
+ },
+ {
+  "desk": "superprod",
+  "title": "Super Productivity",
+  "info": "Tasks, time tracking and planning, synced to your ship",
+  "category": "productivity",
+  "tier": 2
+ },
+ {
+  "desk": "enclosed",
+  "title": "Enclosed",
+  "info": "End-to-end encrypted notes you can share from your ship",
+  "category": "productivity",
+  "tier": 2
+ },
+ {
+  "desk": "office",
+  "title": "Office",
+  "info": "LibreOffice in the browser, documents saved to your ship",
+  "category": "productivity",
+  "tier": 2
+ },
+ {
+  "desk": "jupyter",
+  "title": "JupyterLite",
+  "info": "Python notebooks in the browser, saved to your ship",
+  "category": "developer",
+  "tier": 2
+ },
+ {
+  "desk": "kiwix",
+  "title": "Kiwix",
+  "info": "Read Wikipedia and other ZIM archives offline",
+  "category": "knowledge",
+  "tier": 2
+ }
+]

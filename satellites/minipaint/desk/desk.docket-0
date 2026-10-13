@@ -1,0 +1,10 @@
+:~  title+'miniPaint'
+    info+'Image editor with layers, filters and effects'
+    color+0xf2.abee
+    image+'/minipaint/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/viliusle/miniPaint'
+    license+'MIT'
+    base+'minipaint'
+    site+/minipaint
+==

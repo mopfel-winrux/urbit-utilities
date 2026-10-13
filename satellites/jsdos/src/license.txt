@@ -1,0 +1,8 @@
+This desk packages js-dos 8.5.3 (https://github.com/caiiiycuk/js-dos), GPL-2.0,
+and its emulators (https://github.com/js-dos/emulators), GPL-2.0, which contain:
+  - DOSBox (https://www.dosbox.com), GPL-2.0-or-later
+  - DOSBox-X (https://dosbox-x.com), GPL-2.0-or-later
+  - libzip (https://libzip.org), BSD-3-Clause
+Corresponding source: https://github.com/caiiiycuk/js-dos/tree/v8.5.3 and
+https://github.com/js-dos/emulators. The launcher (index.html, launcher.js) is GPL-2.0.
+Full license text: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt

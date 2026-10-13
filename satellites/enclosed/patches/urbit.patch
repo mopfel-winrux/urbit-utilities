@@ -1,0 +1,322 @@
+diff --git a/packages/app-client/index.html b/packages/app-client/index.html
+index b0a540d..6eea27e 100644
+--- a/packages/app-client/index.html
++++ b/packages/app-client/index.html
+@@ -31,7 +31,6 @@
+     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+-    <link rel="manifest" href="/site.webmanifest">
+ 
+     <!-- Structured Data (JSON-LD for rich snippets) -->
+     <script type="application/ld+json">
+diff --git a/packages/app-client/public/site.webmanifest b/packages/app-client/public/site.webmanifest
+deleted file mode 100644
+index 45dc8a2..0000000
+--- a/packages/app-client/public/site.webmanifest
++++ /dev/null
+@@ -1 +0,0 @@
+-{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+\ No newline at end of file
+diff --git a/packages/app-client/src/index.tsx b/packages/app-client/src/index.tsx
+index d391cd8..4195e04 100644
+--- a/packages/app-client/src/index.tsx
++++ b/packages/app-client/src/index.tsx
+@@ -19,6 +19,7 @@ render(
+ 
+     return (
+       <Router
++        base={import.meta.env.BASE_URL.replace(/\/$/, '')}
+         children={routes}
+         root={props => (
+           <Suspense>
+diff --git a/packages/app-client/src/locales/en.json b/packages/app-client/src/locales/en.json
+index 7d8562b..41357fe 100644
+--- a/packages/app-client/src/locales/en.json
++++ b/packages/app-client/src/locales/en.json
+@@ -52,7 +52,7 @@
+       "empty-note": "Please enter a note content or attach a file.",
+       "rate-limit": "You have exceeded the rate limit for creating notes. Please try again later.",
+       "too-large": "The note content and attachments are too large. Please reduce the size and try again.",
+-      "unauthorized": "You are not authorized to create notes. Please login and try again.",
++      "unauthorized": "Creating notes requires logging in to your Urbit ship (/~/login). Viewing notes works without login.",
+       "api-not-found": "The API endpoint is not found. The server may not be configured correctly.",
+       "unknown": "An error occurred while creating the note, please try again."
+     },
+diff --git a/packages/app-client/src/modules/notes/notes.services.ts b/packages/app-client/src/modules/notes/notes.services.ts
+index a3fa094..09e484c 100644
+--- a/packages/app-client/src/modules/notes/notes.services.ts
++++ b/packages/app-client/src/modules/notes/notes.services.ts
+@@ -1,14 +1,57 @@
+-import { apiClient } from '../shared/http/http-client';
+-
++// Urbit satellite: notes are stored on the ship through the %utilities hub
++// (kit/CONTRACT.md) instead of the upstream Enclosed server.
++//   create: PUT  /utilities/api/store/enclosed/notes/<id>  (login required)
++//   read:   GET  /utilities/pub/enclosed/notes/<id>        (public, burns if burn)
++//   exists: HEAD /utilities/pub/enclosed/notes/<id>        (does not burn)
++// The stored body only holds ciphertext and metadata; the key stays in the URL
++// fragment and never reaches the ship.
+ export { fetchNoteById, fetchNoteExists, storeNote };
+ 
++const APP = 'enclosed';
++const STORE_URL = `/utilities/api/store/${APP}/notes/`;
++const PUB_URL = `/utilities/pub/${APP}/notes/`;
++const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
++
++// ULID (48-bit time + 80-bit random), matches NOTE_ID_REGEX
++function createNoteId() {
++  let time = Date.now();
++  let id = '';
++  for (let i = 0; i < 10; i++) {
++    id = CROCKFORD[time % 32] + id;
++    time = Math.floor(time / 32);
++  }
++  const random = crypto.getRandomValues(new Uint8Array(16));
++  for (let i = 0; i < 16; i++) {
++    id += CROCKFORD[random[i]! % 32];
++  }
++  return id;
++}
++
++async function httpError(response: Response, code: string) {
++  const error = new Error(response.statusText || `HTTP ${response.status}`);
++  Object.assign(error, { status: response.status, body: { error: { code } } });
++  return error;
++}
++
++function errorCode(status: number, notFound: string) {
++  if (status === 401 || status === 403) {
++    return 'auth.unauthorized';
++  }
++  if (status === 404) {
++    return notFound;
++  }
++  if (status === 413) {
++    return 'note.payload_too_large';
++  }
++  return 'unknown';
++}
++
+ async function storeNote({
+   payload,
+   ttlInSeconds,
+   deleteAfterReading,
+   encryptionAlgorithm,
+   serializationFormat,
+-  isPublic,
+ }: {
+   payload: string;
+   ttlInSeconds: number;
+@@ -17,42 +60,67 @@ async function storeNote({
+   serializationFormat: string;
+   isPublic?: boolean;
+ }) {
+-  const { noteId } = await apiClient<{ noteId: string }>({
+-    path: '/api/notes',
+-    method: 'POST',
+-    body: {
+-      payload,
+-      ttlInSeconds,
+-      deleteAfterReading,
+-      serializationFormat,
+-      encryptionAlgorithm,
+-      isPublic,
+-    },
++  const noteId = createNoteId();
++  const headers: Record<string, string> = {
++    'content-type': 'application/json',
++    'x-utilities-public': 'true',
++  };
++  if (deleteAfterReading) {
++    headers['x-utilities-burn'] = 'true';
++  }
++  if (ttlInSeconds) {
++    headers['x-utilities-expires'] = String(Date.now() + ttlInSeconds * 1000);
++  }
++
++  const response = await fetch(STORE_URL + noteId, {
++    method: 'PUT',
++    credentials: 'same-origin',
++    headers,
++    body: JSON.stringify({ payload, encryptionAlgorithm, serializationFormat, deleteAfterReading }),
+   });
+ 
++  if (!response.ok) {
++    throw await httpError(response, errorCode(response.status, 'api.not_found'));
++  }
++
+   return { noteId };
+ }
+ 
+ async function fetchNoteById({ noteId }: { noteId: string }) {
+-  const { note } = await apiClient<{ note: {
++  const response = await fetch(PUB_URL + encodeURIComponent(noteId), { credentials: 'omit', cache: 'no-store' });
++
++  if (!response.ok) {
++    throw await httpError(response, errorCode(response.status, 'note.not_found'));
++  }
++
++  const stored = await response.json() as {
+     payload: string;
+-    isPasswordProtected: boolean;
+-    assets: string[];
+-    serializationFormat: string;
+     encryptionAlgorithm: string;
+-  }; }>({
+-    path: `/api/notes/${noteId}`,
+-    method: 'GET',
+-  });
++    serializationFormat: string;
++  };
++
++  const note = {
++    payload: stored.payload,
++    // upstream derives password protection from the url fragment (#pw:...)
++    isPasswordProtected: false,
++    assets: [] as string[],
++    encryptionAlgorithm: stored.encryptionAlgorithm,
++    serializationFormat: stored.serializationFormat,
++  };
+ 
+   return { note };
+ }
+ 
+ async function fetchNoteExists({ noteId }: { noteId: string }) {
+-  const { noteExists } = await apiClient<{ noteExists: boolean }>({
+-    method: 'GET',
+-    path: `/api/notes/${noteId}/exists`,
+-  });
++  const response = await fetch(PUB_URL + encodeURIComponent(noteId), { method: 'HEAD', credentials: 'omit', cache: 'no-store' });
++  // drain the (empty) body, otherwise Chrome reports the request as aborted
++  await response.arrayBuffer().catch(() => null);
+ 
+-  return { noteExists };
++  if (response.ok) {
++    return { noteExists: true };
++  }
++  if (response.status === 404) {
++    return { noteExists: false };
++  }
++  throw await httpError(response, errorCode(response.status, 'note.not_found'));
+ }
+diff --git a/packages/app-client/src/modules/notes/notes.usecases.ts b/packages/app-client/src/modules/notes/notes.usecases.ts
+index 14551b9..3c540ba 100644
+--- a/packages/app-client/src/modules/notes/notes.usecases.ts
++++ b/packages/app-client/src/modules/notes/notes.usecases.ts
+@@ -1,4 +1,4 @@
+-import { createNote, filesToNoteAssets } from '@enclosed/lib';
++import { createNote, createNoteUrlHashFragment, filesToNoteAssets } from '@enclosed/lib';
+ import { storeNote } from './notes.services';
+ 
+ export { encryptAndCreateNote };
+@@ -11,7 +11,7 @@ async function encryptAndCreateNote(args: {
+   fileAssets: File[];
+   isPublic?: boolean;
+ }) {
+-  return createNote({
++  const created = await createNote({
+     ...args,
+     storeNote,
+     clientBaseUrl: window.location.origin,
+@@ -19,4 +19,14 @@ async function encryptAndCreateNote(args: {
+       ...await filesToNoteAssets({ files: args.fileAssets }),
+     ],
+   });
++
++  // Urbit satellite: the public viewer lives at /enclosed/v/<id>#<fragment>
++  const hashFragment = createNoteUrlHashFragment({
++    encryptionKey: created.encryptionKey,
++    isPasswordProtected: Boolean(args.password),
++    isDeletedAfterReading: args.deleteAfterReading,
++  });
++  const noteUrl = `${window.location.origin}${import.meta.env.BASE_URL}v/${created.noteId}#${hashFragment}`;
++
++  return { ...created, noteUrl };
+ }
+diff --git a/packages/app-client/src/modules/notes/pages/view-note.page.tsx b/packages/app-client/src/modules/notes/pages/view-note.page.tsx
+index d627b83..b4949a4 100644
+--- a/packages/app-client/src/modules/notes/pages/view-note.page.tsx
++++ b/packages/app-client/src/modules/notes/pages/view-note.page.tsx
+@@ -301,7 +301,7 @@ export const ViewNotePage: Component = () => {
+           </div>
+         </Match>
+ 
+-        <Match when={getIsPasswordProtected() && !isPasswordEntered()}>
++        <Match when={getIsPasswordProtected() && getNote() && !isPasswordEntered()}>
+           <RequestPasswordForm onPasswordEntered={decrypt} getIsPasswordInvalid={getIsPasswordInvalid} setIsPasswordInvalid={setIsPasswordInvalid} />
+         </Match>
+ 
+diff --git a/packages/app-client/src/routes.tsx b/packages/app-client/src/routes.tsx
+index bca1499..20f9e01 100644
+--- a/packages/app-client/src/routes.tsx
++++ b/packages/app-client/src/routes.tsx
+@@ -17,7 +17,7 @@ export const routes: RouteDefinition[] = [
+         component: CreateNotePage,
+       },
+       {
+-        path: '/:noteId',
++        path: '/v/:noteId',
+         component: ViewNotePage,
+         matchFilters: {
+           noteId: NOTE_ID_REGEX,
+diff --git a/packages/app-client/uno.config.ts b/packages/app-client/uno.config.ts
+index 63577e4..6feb7a9 100644
+--- a/packages/app-client/uno.config.ts
++++ b/packages/app-client/uno.config.ts
+@@ -1,3 +1,4 @@
++import { createRequire } from 'node:module';
+ import { chain } from 'lodash-es';
+ import {
+   defineConfig,
+@@ -10,6 +11,12 @@ import {
+ import presetAnimations from 'unocss-preset-animations';
+ import { iconByFileType } from './src/modules/files/files.models';
+ 
++// Urbit satellite: download the web font at build time and serve it from
++// /enclosed/assets/fonts instead of fonts.bunny.net at runtime.
++// (@unocss/preset-web-fonts is a dependency of unocss, resolve it from there)
++const requireFromUno = createRequire(createRequire(import.meta.url).resolve('unocss'));
++const { createLocalFontProcessor } = requireFromUno('@unocss/preset-web-fonts/local');
++
+ export default defineConfig({
+   presets: [
+     presetUno({
+@@ -22,6 +29,10 @@ export default defineConfig({
+     presetAnimations(),
+     presetWebFonts({
+       provider: 'bunny',
++      processors: createLocalFontProcessor({
++        fontAssetsDir: 'public/assets/fonts',
++        fontServeBaseUrl: '/enclosed/assets/fonts',
++      }),
+       fonts: {
+         sans: 'Inter:400,500,600,700,800,900',
+       },
+diff --git a/packages/app-client/vite.config.ts b/packages/app-client/vite.config.ts
+index 4d630a9..03e7fd1 100644
+--- a/packages/app-client/vite.config.ts
++++ b/packages/app-client/vite.config.ts
+@@ -6,6 +6,8 @@ import solidPlugin from 'vite-plugin-solid';
+ import { configDefaults } from 'vitest/config';
+ 
+ export default defineConfig({
++  // Urbit satellite: served by %enclosed-fileserver under /enclosed/
++  base: '/enclosed/',
+   plugins: [
+     unoCssPlugin(),
+     solidPlugin(),
+@@ -24,6 +26,13 @@ export default defineConfig({
+   },
+   build: {
+     target: 'esnext',
++    // clay-safe file names: lowercase hex hashes and chunk names
++    rollupOptions: {
++      output: {
++        hashCharacters: 'hex',
++        chunkFileNames: chunk => `assets/${chunk.name.toLowerCase()}-[hash].js`,
++      },
++    },
+   },
+   resolve: {
+     alias: {

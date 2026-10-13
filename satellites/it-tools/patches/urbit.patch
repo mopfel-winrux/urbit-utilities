@@ -1,0 +1,90 @@
+diff --git a/src/main.ts b/src/main.ts
+index 19d28bf..881ade3 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -2,7 +2,6 @@ import { createApp } from 'vue';
+ import { createPinia } from 'pinia';
+ import { createHead } from '@vueuse/head';
+ 
+-import { registerSW } from 'virtual:pwa-register';
+ import shadow from 'vue-shadow-dom';
+ import { plausible } from './plugins/plausible.plugin';
+ 
+@@ -14,8 +13,6 @@ import App from './App.vue';
+ import router from './router';
+ import { i18nPlugin } from './plugins/i18n.plugin';
+ 
+-registerSW();
+-
+ const app = createApp(App);
+ 
+ app.use(createPinia());
+diff --git a/src/tools/ascii-text-drawer/ascii-text-drawer.vue b/src/tools/ascii-text-drawer/ascii-text-drawer.vue
+index 9a6520a..c87fc9d 100644
+--- a/src/tools/ascii-text-drawer/ascii-text-drawer.vue
++++ b/src/tools/ascii-text-drawer/ascii-text-drawer.vue
+@@ -9,7 +9,7 @@ const output = ref('');
+ const errored = ref(false);
+ const processing = ref(false);
+ 
+-figlet.defaults({ fontPath: '//unpkg.com/figlet@1.6.0/fonts/' });
++figlet.defaults({ fontPath: `${import.meta.env.BASE_URL}figlet-fonts` }); // urbit: vendored from node_modules/figlet/fonts
+ 
+ watchEffect(async () => {
+   processing.value = true;
+diff --git a/vite.config.ts b/vite.config.ts
+index 42a2cb2..e0e3bcb 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -11,7 +11,6 @@ import Icons from 'unplugin-icons/vite';
+ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
+ import Components from 'unplugin-vue-components/vite';
+ import { defineConfig } from 'vite';
+-import { VitePWA } from 'vite-plugin-pwa';
+ import markdown from 'vite-plugin-vue-markdown';
+ import svgLoader from 'vite-svg-loader';
+ import { configDefaults } from 'vitest/config';
+@@ -53,43 +52,6 @@ export default defineConfig({
+     vueJsx(),
+     markdown(),
+     svgLoader(),
+-    VitePWA({
+-      registerType: 'autoUpdate',
+-      strategies: 'generateSW',
+-      manifest: {
+-        name: 'IT Tools',
+-        description: 'Aggregated set of useful tools for developers.',
+-        display: 'standalone',
+-        lang: 'fr-FR',
+-        start_url: `${baseUrl}?utm_source=pwa&utm_medium=pwa`,
+-        orientation: 'any',
+-        theme_color: '#18a058',
+-        background_color: '#f1f5f9',
+-        icons: [
+-          {
+-            src: '/favicon-16x16.png',
+-            type: 'image/png',
+-            sizes: '16x16',
+-          },
+-          {
+-            src: '/favicon-32x32.png',
+-            type: 'image/png',
+-            sizes: '32x32',
+-          },
+-          {
+-            src: '/android-chrome-192x192.png',
+-            sizes: '192x192',
+-            type: 'image/png',
+-          },
+-          {
+-            src: '/android-chrome-512x512.png',
+-            sizes: '512x512',
+-            type: 'image/png',
+-            purpose: 'any maskable',
+-          },
+-        ],
+-      },
+-    }),
+     Components({
+       dirs: ['src/'],
+       extensions: ['vue', 'md'],

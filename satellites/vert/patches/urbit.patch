@@ -1,0 +1,514 @@
+diff --git a/src/lib/components/functional/Uploader.svelte b/src/lib/components/functional/Uploader.svelte
+index 188aab6..320dc49 100644
+--- a/src/lib/components/functional/Uploader.svelte
++++ b/src/lib/components/functional/Uploader.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++	import { base } from "$app/paths";
+ 	import { UploadIcon } from "@lucide/svelte";
+ 	import Panel from "../visual/Panel.svelte";
+ 	import clsx from "clsx";
+@@ -25,7 +26,7 @@
+ 		if (!fileInput) return;
+ 		const oldLength = files.files.length;
+ 		await files.addAsync(fileInput.files);
+-		if (files.files.length !== oldLength) goto("/convert");
++		if (files.files.length !== oldLength) goto(`${base}/convert/`);
+ 	};
+ 
+ 	onMount(() => {
+diff --git a/src/lib/components/layout/Footer.svelte b/src/lib/components/layout/Footer.svelte
+index c861128..418fd86 100644
+--- a/src/lib/components/layout/Footer.svelte
++++ b/src/lib/components/layout/Footer.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts" context="module">
++	import { base } from "$app/paths";
+ 	import { GITHUB_URL_VERT, DISCORD_URL } from "$lib/util/consts";
+ 	import { m } from "$lib/paraglide/messages";
+ 
+@@ -39,7 +40,7 @@
+ 			{m["footer.discord_server"]()}
+ 		</a>
+ 		<p>•</p>
+-		<a class="hover:underline font-normal" href="/privacy/">
++		<a class="hover:underline font-normal" href="{base}/privacy/">
+ 			{m["footer.privacy_policy"]()}
+ 		</a>
+ 		{#if commitHash}
+diff --git a/src/lib/components/layout/Gradients.svelte b/src/lib/components/layout/Gradients.svelte
+index d7b2218..85ca75e 100644
+--- a/src/lib/components/layout/Gradients.svelte
++++ b/src/lib/components/layout/Gradients.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++	import { stripBase } from "$lib/util/base";
+ 	import { page } from "$app/state";
+ 	import { duration, transition } from "$lib/util/animation";
+ 	import VertVBig from "$lib/assets/vert-bg.svg?component";
+@@ -45,7 +46,7 @@
+ 	]);
+ 
+ 	const color = $derived(
+-		Object.values(colors).find((p) => p.matcher(page.url.pathname)) || {
++		Object.values(colors).find((p) => p.matcher(stripBase(page.url.pathname))) || {
+ 			matcher: () => false,
+ 			color: "transparent",
+ 			at: 0,
+@@ -68,7 +69,7 @@
+ 	);
+ </script>
+ 
+-{#if page.url.pathname === "/"}
++{#if stripBase(page.url.pathname) === "/"}
+ 	<div
+ 		class="fixed -z-30 top-0 left-0 w-screen h-screen flex items-center justify-center overflow-hidden"
+ 		transition:fade={{
+@@ -90,7 +91,7 @@
+ 	transition: background-color {duration}ms {transition};"
+ ></div>
+ 
+-{#if page.url.pathname === "/convert/" && files.files.length === 1}
++{#if stripBase(page.url.pathname) === "/convert/" && files.files.length === 1}
+ 	{@const bgMask =
+ 		"linear-gradient(to top, transparent 5%, rgba(0, 0, 0, 0.5) 100%)"}
+ 	<div
+@@ -116,7 +117,7 @@
+ 			easing: quintOut,
+ 		}}
+ 	></div>
+-{:else if (page.url.pathname === "/convert/" || page.url.pathname === "/jpegify/") && $showGradient}
++{:else if (stripBase(page.url.pathname) === "/convert/" || stripBase(page.url.pathname) === "/jpegify/") && $showGradient}
+ 	{#key $gradientColor}
+ 		<div
+ 			id="gradient-bg"
+@@ -128,7 +129,7 @@
+ 			}}
+ 		></div>
+ 	{/key}
+-{:else if page.url.pathname === "/convert/" && files.files.length === 1 && files.files[0].blobUrl}
++{:else if stripBase(page.url.pathname) === "/convert/" && files.files.length === 1 && files.files[0].blobUrl}
+ 	<div
+ 		class="fixed w-screen h-screen opacity-75 overflow-hidden top-0 left-0 -z-50 pointer-events-none grid grid-cols-1 grid-rows-1 scale-105"
+ 	>
+@@ -150,7 +151,7 @@
+ 			></div>
+ 		</div>
+ 	</div>
+-{:else if page.url.pathname === "/settings/"}
++{:else if stripBase(page.url.pathname) === "/settings/"}
+ 	<div
+ 		id="gradient-bg"
+ 		class="fixed top-0 left-0 w-screen h-screen -z-40 pointer-events-none"
+@@ -160,7 +161,7 @@
+ 			easing: quintOut,
+ 		}}
+ 	></div>
+-{:else if page.url.pathname === "/about/"}
++{:else if stripBase(page.url.pathname) === "/about/"}
+ 	<div
+ 		id="gradient-bg"
+ 		class="fixed top-0 left-0 w-screen h-screen -z-40 pointer-events-none"
+diff --git a/src/lib/components/layout/MobileLogo.svelte b/src/lib/components/layout/MobileLogo.svelte
+index a438693..7e7d5aa 100644
+--- a/src/lib/components/layout/MobileLogo.svelte
++++ b/src/lib/components/layout/MobileLogo.svelte
+@@ -1,11 +1,12 @@
+ <script>
++	import { base } from "$app/paths";
+ 	import Logo from "$lib/components/visual/svg/Logo.svelte";
+ </script>
+ 
+ <div class="flex md:hidden justify-center items-center pb-8 pt-4">
+ 	<a
+ 		class="flex items-center justify-center bg-panel p-2 rounded-[20px] shadow-panel"
+-		href="/"
++		href="{base}/"
+ 	>
+ 		<div
+ 			class="h-14 bg-accent rounded-[14px] flex items-center justify-center"
+diff --git a/src/lib/components/layout/Navbar/Base.svelte b/src/lib/components/layout/Navbar/Base.svelte
+index aa48407..1e81923 100644
+--- a/src/lib/components/layout/Navbar/Base.svelte
++++ b/src/lib/components/layout/Navbar/Base.svelte
+@@ -1,4 +1,6 @@
+ <script lang="ts">
++	import { stripBase } from "$lib/util/base";
++	import { base } from "$app/paths";
+ 	import { browser } from "$app/environment";
+ 	import { page } from "$app/state";
+ 	import { duration, fade } from "$lib/util/animation";
+@@ -35,28 +37,30 @@
+ 	>([
+ 		{
+ 			name: m["navbar.upload"](),
+-			url: "/",
+-			activeMatch: (pathname) => pathname === "/",
++			url: `${base}/`,
++			activeMatch: (pathname) => stripBase(pathname) === "/",
+ 			icon: UploadIcon,
+ 		},
+ 		{
+ 			name: m["navbar.convert"](),
+-			url: "/convert/",
++			url: `${base}/convert/`,
+ 			activeMatch: (pathname) =>
+-				pathname === "/convert/" || pathname === "/convert",
++				stripBase(pathname) === "/convert/" ||
++				stripBase(pathname) === "/convert",
+ 			icon: RefreshCw,
+ 			badge: files.files.length,
+ 		},
+ 		{
+ 			name: m["navbar.settings"](),
+-			url: "/settings/",
+-			activeMatch: (pathname) => pathname.startsWith("/settings"),
++			url: `${base}/settings/`,
++			activeMatch: (pathname) =>
++				stripBase(pathname).startsWith("/settings"),
+ 			icon: SettingsIcon,
+ 		},
+ 		{
+ 			name: m["navbar.about"](),
+-			url: "/about/",
+-			activeMatch: (pathname) => pathname.startsWith("/about"),
++			url: `${base}/about/`,
++			activeMatch: (pathname) => stripBase(pathname).startsWith("/about"),
+ 			icon: InfoIcon,
+ 		},
+ 	]);
+@@ -184,7 +188,7 @@
+ 		{/if}
+ 		<a
+ 			class="w-28 h-full bg-accent rounded-xl items-center justify-center hidden md:flex"
+-			href="/"
++			href="{base}/"
+ 		>
+ 			<div class="h-5 w-full">
+ 				<Logo />
+diff --git a/src/lib/converters/ffmpeg/ffmpeg.svelte.ts b/src/lib/converters/ffmpeg/ffmpeg.svelte.ts
+index 63296d3..6044497 100644
+--- a/src/lib/converters/ffmpeg/ffmpeg.svelte.ts
++++ b/src/lib/converters/ffmpeg/ffmpeg.svelte.ts
+@@ -1,3 +1,4 @@
++import { base } from "$app/paths";
+ import { VertFile } from "$lib/types";
+ import { Converter, FormatInfo } from "../converter.svelte";
+ import { FFmpeg } from "@ffmpeg/ffmpeg";
+@@ -84,8 +85,7 @@ export class FFmpegConverter extends Converter {
+ 		this.ffmpeg = new FFmpeg();
+ 		void (async () => {
+ 			try {
+-				const baseURL =
+-					"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
++				const baseURL = `${base}/ffmpeg`;
+ 
+ 				this.status = "downloading";
+ 
+@@ -357,8 +357,7 @@ export class FFmpegConverter extends Converter {
+ 			});
+ 		}
+ 
+-		const baseURL =
+-			"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
++		const baseURL = `${base}/ffmpeg`;
+ 		await ffmpeg.load({
+ 			coreURL: `${baseURL}/ffmpeg-core.js`,
+ 			wasmURL: `${baseURL}/ffmpeg-core.wasm`,
+diff --git a/src/lib/converters/pandoc/pandoc.svelte.ts b/src/lib/converters/pandoc/pandoc.svelte.ts
+index 1266a81..c05d5ca 100644
+--- a/src/lib/converters/pandoc/pandoc.svelte.ts
++++ b/src/lib/converters/pandoc/pandoc.svelte.ts
+@@ -1,3 +1,4 @@
++import { base } from "$app/paths";
+ import { VertFile, type WorkerMessage } from "$lib/types";
+ import { Converter, FormatInfo } from "../converter.svelte";
+ import { browser } from "$app/environment";
+@@ -26,7 +27,7 @@ export class PandocConverter extends Converter {
+ 		(async () => {
+ 			try {
+ 				this.status = "downloading";
+-				this.wasm = await fetch("/pandoc.wasm").then((r) =>
++				this.wasm = await fetch(`${base}/pandoc.wasm`).then((r) =>
+ 					r.arrayBuffer(),
+ 				);
+ 
+diff --git a/src/lib/sections/about/Donate.svelte b/src/lib/sections/about/Donate.svelte
+index f998a7c..eae0fc4 100644
+--- a/src/lib/sections/about/Donate.svelte
++++ b/src/lib/sections/about/Donate.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts" module>
++	import { base } from "$app/paths";
+ 	export interface Donor {
+ 		name: string;
+ 		amount: number;
+@@ -177,7 +178,7 @@
+ 					});
+ 			}
+ 
+-			goto("/about");
++			goto(`${base}/about`);
+ 		}
+ 	});
+ </script>
+diff --git a/src/lib/sections/settings/Privacy.svelte b/src/lib/sections/settings/Privacy.svelte
+index 734ab64..b3b5649 100644
+--- a/src/lib/sections/settings/Privacy.svelte
++++ b/src/lib/sections/settings/Privacy.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++	import { base } from "$app/paths";
+ 	import Panel from "$lib/components/visual/Panel.svelte";
+ 	import {
+ 		BugIcon,
+@@ -338,7 +339,7 @@
+ 
+ 			<div class="flex justify-center">
+ 				<a
+-					href="/debug"
++					href="{base}/debug/"
+ 					class="text-xs text-muted hover:text-foreground transition-colors flex items-center gap-1"
+ 				>
+ 					<BugIcon size="14" />
+diff --git a/src/lib/sections/settings/vertdSettings.svelte.ts b/src/lib/sections/settings/vertdSettings.svelte.ts
+index b16b333..338b89b 100644
+--- a/src/lib/sections/settings/vertdSettings.svelte.ts
++++ b/src/lib/sections/settings/vertdSettings.svelte.ts
+@@ -3,6 +3,7 @@ import { PUB_VERTD_URL } from "$env/static/public";
+ import { error, log } from "$lib/util/logger.svelte";
+ import { writable } from "svelte/store";
+ import { getVertdLimit } from "$lib/store/index.svelte";
++import { DISABLE_ALL_EXTERNAL_REQUESTS } from "$lib/util/consts";
+ 
+ const LOCATIONS = [
+ 	{ url: "https://eu.vertd.vert.sh" },
+@@ -165,6 +166,8 @@ export function useVertdSizeLimit() {
+ 		let cancelled = false;
+ 
+ 		const loadLimit = async () => {
++			// vertd is an external server; don't probe it when external requests are off
++			if (DISABLE_ALL_EXTERNAL_REQUESTS) return;
+ 			const apiUrl = await VertdInstance.instance.url();
+ 			if (cancelled) return;
+ 
+diff --git a/src/lib/store/index.svelte.ts b/src/lib/store/index.svelte.ts
+index 24fb5dd..39ad368 100644
+--- a/src/lib/store/index.svelte.ts
++++ b/src/lib/store/index.svelte.ts
+@@ -1,3 +1,4 @@
++import { withBase } from "$lib/util/base";
+ import { browser } from "$app/environment";
+ import {
+ 	byNative,
+@@ -622,7 +623,7 @@ export function link(
+ 	let result = text;
+ 
+ 	tags.forEach((t, i) => {
+-		const link = linksArr[i] ?? "#";
++		const link = withBase(linksArr[i] ?? "#");
+ 		const target = newTabArr[i]
+ 			? 'target="_blank" rel="noopener noreferrer"'
+ 			: "";
+diff --git a/src/lib/util/base.ts b/src/lib/util/base.ts
+new file mode 100644
+index 0000000..701c6cc
+--- /dev/null
++++ b/src/lib/util/base.ts
+@@ -0,0 +1,9 @@
++import { base } from "$app/paths";
++
++// VERT is served under a sub-path on Urbit (e.g. /vert). These helpers
++// prefix/strip that base for internal root-relative URLs.
++export const withBase = (path: string): string =>
++	path.startsWith("/") && !path.startsWith("//") ? `${base}${path}` : path;
++
++export const stripBase = (path: string): string =>
++	base && path.startsWith(base) ? path.slice(base.length) || "/" : path;
+diff --git a/src/lib/util/sw.ts b/src/lib/util/sw.ts
+index ea1246a..d8be5af 100644
+--- a/src/lib/util/sw.ts
++++ b/src/lib/util/sw.ts
+@@ -1,3 +1,4 @@
++import { base } from "$app/paths";
+ import { browser } from "$app/environment";
+ 
+ export interface CacheInfo {
+@@ -21,9 +22,9 @@ class ServiceWorkerManager {
+ 
+ 		try {
+ 			this.registration = await navigator.serviceWorker.register(
+-				"/sw.js",
++				`${base}/sw.js`,
+ 				{
+-					scope: "/",
++					scope: `${base}/`,
+ 				},
+ 			);
+ 
+diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
+index 187d255..984001b 100644
+--- a/src/routes/+layout.svelte
++++ b/src/routes/+layout.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++	import { base } from "$app/paths";
+ 	import { onMount } from "svelte";
+ 	import { goto, beforeNavigate, afterNavigate } from "$app/navigation";
+ 
+@@ -54,7 +55,7 @@
+ 		dropping.set(false);
+ 		const oldLength = files.files.length;
+ 		await files.addAsync(e.dataTransfer?.files);
+-		if (files.files.length !== oldLength) goto("/convert");
++		if (files.files.length !== oldLength) goto(`${base}/convert/`);
+ 	};
+ 
+ 	const handleDrag = (e: DragEvent, drag: boolean) => {
+@@ -68,7 +69,7 @@
+ 		e.preventDefault();
+ 		const oldLength = files.files.length;
+ 		await files.addAsync(clipboardData.files);
+-		if (files.files.length !== oldLength) goto("/convert");
++		if (files.files.length !== oldLength) goto(`${base}/convert/`);
+ 	};
+ 
+ 	onMount(() => {
+@@ -211,7 +212,7 @@
+ 		property="twitter:image"
+ 		content="https://vert.sh/VERT_Feature.webp"
+ 	/>
+-	<link rel="manifest" href="/manifest.json" />
++	<link rel="manifest" href="{base}/manifest.json" crossorigin="use-credentials" />
+ 	<link rel="canonical" href="https://vert.sh/" />
+ 	{#if enablePlausible}
+ 		<script
+diff --git a/static/manifest.json b/static/manifest.json
+index d6ba108..ec6a526 100644
+--- a/static/manifest.json
++++ b/static/manifest.json
+@@ -2,7 +2,8 @@
+ 	"name": "VERT",
+ 	"short_name": "VERT",
+ 	"description": "The file converter you'll love",
+-	"start_url": "/",
++	"start_url": "./",
++	"scope": "./",
+ 	"display": "standalone",
+ 	"background_color": "#ffffff",
+ 	"theme_color": "#F2ABEE",
+diff --git a/static/sw.js b/static/sw.js
+index 6b5b9d3..1e9a7fb 100644
+--- a/static/sw.js
++++ b/static/sw.js
+@@ -1,9 +1,12 @@
+ const CACHE_NAME = "vert-wasm-cache-v3"; // updated when workers update
+ 
++// the app may be served under a sub-path (e.g. /vert on an Urbit ship)
++const BASE = new URL(self.registration.scope).pathname.replace(/\/$/, "");
++
+ const WASM_FILES = [
+-	"/pandoc.wasm", // from https://github.com/haskell-wasm/pandoc-wasm
+-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
+-	"https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
++	`${BASE}/pandoc.wasm`, // from https://github.com/haskell-wasm/pandoc-wasm
++	`${BASE}/ffmpeg/ffmpeg-core.js`,
++	`${BASE}/ffmpeg/ffmpeg-core.wasm`,
+ ];
+ 
+ const WASM_URL_PATTERNS = [
+diff --git a/svelte.config.js b/svelte.config.js
+index 0349799..8a36ef7 100644
+--- a/svelte.config.js
++++ b/svelte.config.js
+@@ -14,6 +14,8 @@ const config = {
+ 		adapter: adapter(),
+ 		paths: {
+ 			relative: false,
++			// served from an Urbit ship under /vert (override with VERT_BASE="")
++			base: process.env.VERT_BASE ?? "/vert",
+ 		},
+ 		env: {
+ 			publicPrefix: "PUB_",
+diff --git a/vite.config.ts b/vite.config.ts
+index 51af975..edc6a8c 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -1,6 +1,7 @@
+ import { paraglideVitePlugin } from "@inlang/paraglide-js";
+ import { sveltekit } from "@sveltejs/kit/vite";
+-import { defineConfig, type PluginOption } from "vite";
++import { defineConfig, type Plugin, type PluginOption } from "vite";
++import type { OutputOptions, PreRenderedAsset, PreRenderedChunk } from "rollup";
+ import svg from "@poppanator/sveltekit-svg";
+ import wasm from "vite-plugin-wasm";
+ import { execSync } from "child_process";
+@@ -19,9 +20,59 @@ if (commitHash === "unknown") {
+ 	}
+ }
+ 
++// Clay paths only allow [a-z0-9-._~], so emitted filenames must be lowercase.
++// Use hex hashes and lowercase/sanitize the [name] part of every pattern.
++const clayName = (name: string) =>
++	name.toLowerCase().replace(/[^a-z0-9/._-]/g, "-");
++
++const assetName = (info: PreRenderedAsset) => {
++	const file = (info.names?.[0] ?? info.name ?? "asset").split("/").pop()!;
++	const dot = file.lastIndexOf(".");
++	return clayName(dot > 0 ? file.slice(0, dot) : file);
++};
++
++type FileNames = OutputOptions["entryFileNames"];
++
++function clayFileNames(
++	pattern: FileNames,
++	nameOf: (info: never) => string,
++): FileNames {
++	if (pattern === undefined) return pattern;
++	return (info: never) => {
++		const p =
++			typeof pattern === "function" ? pattern(info as never) : pattern;
++		return p.replaceAll("[name]", nameOf(info));
++	};
++}
++
++const clayFilenames = (): Plugin => ({
++	name: "vert:clay-filenames",
++	enforce: "post",
++	outputOptions(opts) {
++		const chunkName = (c: PreRenderedChunk) => clayName(c.name);
++		return {
++			...opts,
++			hashCharacters: "hex",
++			entryFileNames: clayFileNames(
++				opts.entryFileNames ?? "[name].js",
++				chunkName as never,
++			),
++			chunkFileNames: clayFileNames(
++				opts.chunkFileNames ?? "[name]-[hash].js",
++				chunkName as never,
++			),
++			assetFileNames: clayFileNames(
++				opts.assetFileNames ?? "assets/[name]-[hash][extname]",
++				assetName as never,
++			) as OutputOptions["assetFileNames"],
++		};
++	},
++});
++
+ export default defineConfig(({ command }) => {
+ 	const plugins: PluginOption[] = [
+ 		sveltekit(),
++		clayFilenames(),
+ 		paraglideVitePlugin({
+ 			project: "./project.inlang",
+ 			outdir: "./src/lib/paraglide",
+@@ -48,7 +99,7 @@ export default defineConfig(({ command }) => {
+ 	return {
+ 		plugins,
+ 		worker: {
+-			plugins: () => [wasm()],
++			plugins: () => [wasm(), clayFilenames()],
+ 			format: "es",
+ 		},
+ 		optimizeDeps: {

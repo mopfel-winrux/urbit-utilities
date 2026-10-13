@@ -1,0 +1,177 @@
+diff --git a/lib/entry-data-plugin.js b/lib/entry-data-plugin.js
+index d131e1ae..863e8421 100644
+--- a/lib/entry-data-plugin.js
++++ b/lib/entry-data-plugin.js
+@@ -20,7 +20,7 @@ const placeholderRe = /(ENTRY_DATA_PLUGIN_(?:MAIN_NAME|DEPS))(\d+)/g;
+ 
+ /** @param {string} fileName */
+ export function fileNameToURL(fileName) {
+-  return fileName.replace(/^static\//, '/');
++  return fileName.replace(/^static\//, '/squoosh/');
+ }
+ 
+ export default function entryDataPlugin() {
+diff --git a/src/client/initial-app/App/index.tsx b/src/client/initial-app/App/index.tsx
+index 36d92a8a..3f1e5311 100644
+--- a/src/client/initial-app/App/index.tsx
++++ b/src/client/initial-app/App/index.tsx
+@@ -12,7 +12,7 @@ import 'shared/custom-els/snack-bar';
+ import Intro from 'shared/prerendered-app/Intro';
+ import 'shared/custom-els/loading-spinner';
+ 
+-const ROUTE_EDITOR = '/editor';
++const ROUTE_EDITOR = '/squoosh/editor';
+ 
+ const compressPromise = import('client/lazy-app/Compress');
+ const swBridgePromise = import('client/lazy-app/sw-bridge');
+@@ -58,7 +58,7 @@ export default class App extends Component<Props, State> {
+       if (!this.state.awaitingShareTarget) return;
+       const file = await getSharedImage();
+       // Remove the ?share-target from the URL
+-      history.replaceState('', '', '/');
++      history.replaceState('', '', '/squoosh/');
+       this.openEditor();
+       this.setState({ file, awaitingShareTarget: false });
+     });
+diff --git a/src/client/initial-app/index.tsx b/src/client/initial-app/index.tsx
+index 3f387cee..cb33f82a 100644
+--- a/src/client/initial-app/index.tsx
++++ b/src/client/initial-app/index.tsx
+@@ -31,16 +31,7 @@ main();
+       ? 'standalone'
+       : 'browser';
+ 
+-  // Setup analytics
+-  window.ga = window.ga || ((...args) => (ga.q = ga.q || []).push(args));
+-  ga('create', 'UA-128752250-1', 'auto');
+-  ga('set', 'transport', 'beacon');
+-  ga('set', 'dimension1', displayMode);
+-  ga('send', 'pageview', '/index.html', { title: 'Squoosh' });
+-  // Load the GA script without keeping the browser spinner going.
+-  addEventListener('load', () => {
+-    const script = document.createElement('script');
+-    script.src = 'https://www.google-analytics.com/analytics.js';
+-    document.head.appendChild(script);
+-  });
++  // urbit: no Google Analytics; keep a no-op ga() for the app's event calls
++  window.ga = window.ga || ((...args) => {});
++  void displayMode;
+ }
+diff --git a/src/static-build/index.tsx b/src/static-build/index.tsx
+index 59a8daa8..96c4873f 100644
+--- a/src/static-build/index.tsx
++++ b/src/static-build/index.tsx
+@@ -57,7 +57,7 @@ const toOutput: Output = {
+   'manifest.json': JSON.stringify({
+     name: 'Squoosh',
+     short_name: 'Squoosh',
+-    start_url: '/?utm_medium=PWA&utm_source=launcher',
++    start_url: '/squoosh/',
+     display: 'standalone',
+     orientation: 'any',
+     background_color: '#fff',
+@@ -81,7 +81,7 @@ const toOutput: Output = {
+     categories: ['photo', 'productivity', 'utilities'],
+     screenshots,
+     share_target: {
+-      action: '/?utm_medium=PWA&utm_source=share-target&share-target',
++      action: '/squoosh/?share-target',
+       method: 'POST',
+       enctype: 'multipart/form-data',
+       params: {
+diff --git a/src/static-build/pages/index/index.tsx b/src/static-build/pages/index/index.tsx
+index 8bca0ae5..bf843786 100644
+--- a/src/static-build/pages/index/index.tsx
++++ b/src/static-build/pages/index/index.tsx
+@@ -61,7 +61,7 @@ const Index: FunctionalComponent<Props> = () => (
+       <link rel="shortcut icon" href={favicon} />
+       <link rel="apple-touch-icon" href={ogImage} />
+       <meta name="theme-color" content="#ff3385" />
+-      <link rel="manifest" href="/manifest.json" />
++      <link rel="manifest" href="/squoosh/manifest.json" />
+       <link rel="canonical" href={siteOrigin} />
+       <style
+         dangerouslySetInnerHTML={{ __html: escapeStyleScriptContent(baseCss) }}
+@@ -92,7 +92,7 @@ const Index: FunctionalComponent<Props> = () => (
+                 Initialization error: This site requires JavaScript, which is
+                 disabled in your browser.
+               </div>
+-              <a class={snackbarStyle.button} href="/">
++              <a class={snackbarStyle.button} href="/squoosh/">
+                 reload
+               </a>
+             </div>
+diff --git a/src/sw/index.ts b/src/sw/index.ts
+index 266f2c55..f0f320c7 100644
+--- a/src/sw/index.ts
++++ b/src/sw/index.ts
+@@ -54,13 +54,13 @@ self.addEventListener('fetch', (event) => {
+   // Don't care about other-origin URLs
+   if (url.origin !== location.origin) return;
+ 
+-  if (url.pathname === '/editor') {
+-    event.respondWith(Response.redirect('/'));
++  if (url.pathname === '/squoosh/editor') {
++    event.respondWith(Response.redirect('/squoosh/'));
+     return;
+   }
+ 
+   if (
+-    url.pathname === '/' &&
++    url.pathname === '/squoosh/' &&
+     url.searchParams.has('share-target') &&
+     event.request.method === 'POST'
+   ) {
+diff --git a/src/sw/to-cache.ts b/src/sw/to-cache.ts
+index 49afaf07..28ddafb0 100644
+--- a/src/sw/to-cache.ts
++++ b/src/sw/to-cache.ts
+@@ -50,7 +50,7 @@ import * as wp2EncMt from 'entry-data:codecs/wp2/enc/wp2_enc_mt';
+ import * as wp2Enc from 'entry-data:codecs/wp2/enc/wp2_enc';
+ 
+ export function shouldCacheDynamically(url: string) {
+-  return url.startsWith('/c/demo-');
++  return url.startsWith('/squoosh/c/demo-');
+ }
+ 
+ let initialJs = new Set([
+@@ -80,7 +80,7 @@ initialJs = subtractSets(
+   ]),
+ );
+ 
+-export const initial = ['/', ...initialJs];
++export const initial = ['/squoosh/', ...initialJs];
+ 
+ export const theRest = (async () => {
+   const [supportsThreads, supportsSimd, supportsWebP, supportsAvif] =
+diff --git a/src/sw/util.ts b/src/sw/util.ts
+index 8579aa59..63a718a2 100644
+--- a/src/sw/util.ts
++++ b/src/sw/util.ts
+@@ -27,6 +27,8 @@ export function cacheOrNetworkAndCache(
+ 
+       // Else go to the network.
+       const response = await fetch(request);
++      // never cache errors or login redirects
++      if (!response.ok || response.redirected) return response;
+       const responseToCache = response.clone();
+ 
+       event.waitUntil(
+@@ -47,7 +49,7 @@ export function serveShareTarget(event: FetchEvent): void {
+   const dataPromise = event.request.formData();
+ 
+   // Redirect so the user can refresh the page without resending data.
+-  event.respondWith(Response.redirect('/?share-target'));
++  event.respondWith(Response.redirect('/squoosh/?share-target'));
+ 
+   event.waitUntil(
+     (async function () {
+@@ -74,7 +76,7 @@ export function cleanupCache(
+       const requests = await cache.keys();
+       const promises = requests.map((cachedRequest) => {
+         // Get pathname without leading /
+-        const assetPath = new URL(cachedRequest.url).pathname.slice(1);
++        const assetPath = new URL(cachedRequest.url).pathname.slice('/squoosh/'.length);
+         // If it isn't one of our keepAssets, we don't need it anymore.
+         if (!keepAssets.includes(assetPath)) return cache.delete(cachedRequest);
+       });

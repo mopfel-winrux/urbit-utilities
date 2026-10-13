@@ -1,0 +1,10 @@
+:~  title+'JupyterLite'
+    info+'Python notebooks in the browser (JupyterLite with a Pyodide kernel: numpy, pandas, matplotlib), saved to your ship.'
+    color+0xf3.7726
+    image+'/jupyter/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/jupyterlite/jupyterlite'
+    license+'BSD-3-Clause'
+    base+'jupyter'
+    site+/jupyter
+==

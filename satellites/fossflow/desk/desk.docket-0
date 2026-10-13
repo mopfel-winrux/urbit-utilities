@@ -1,0 +1,10 @@
+:~  title+'FossFLOW'
+    info+'Isometric infrastructure diagrams'
+    color+0xf2.abee
+    image+'/fossflow/icon.png'
+    version+[0 1 0]
+    website+'https://github.com/Abrar74774/FossFLOW'
+    license+'MIT'
+    base+'fossflow'
+    site+/fossflow
+==

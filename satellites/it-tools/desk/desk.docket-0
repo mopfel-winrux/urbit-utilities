@@ -1,0 +1,10 @@
+:~  title+'IT Tools'
+    info+'Handy tools for developers: encoders, hashes, converters'
+    color+0xf2.abee
+    image+'/it-tools/icon.png'
+    version+[0 1 0]
+    website+'https://github.com/CorentinTh/it-tools'
+    license+'GPL-3.0-only'
+    base+'it-tools'
+    site+/it-tools
+==

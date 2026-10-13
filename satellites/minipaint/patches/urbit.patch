@@ -1,0 +1,74 @@
+diff --git a/src/js/config-menu.js b/src/js/config-menu.js
+index a5e6b3f..9146242 100644
+--- a/src/js/config-menu.js
++++ b/src/js/config-menu.js
+@@ -43,11 +43,6 @@ const menuDefinition = [
+ 					}
+ 				]
+ 			},
+-			{
+-				name: 'Search Images',
+-				ellipsis: true,
+-				target: 'file/open.search'
+-			},
+ 			{
+ 				divider: true
+ 			},
+diff --git a/src/js/config.js b/src/js/config.js
+index 9da6ebd..d13492c 100644
+--- a/src/js/config.js
++++ b/src/js/config.js
+@@ -191,6 +191,7 @@ config.TOOLS = [
+ 	},
+ 	{
+ 		name: 'media',
++		visible: false,
+ 		title: 'Search Images',
+ 		on_activate: 'on_activate',
+ 		attributes: {
+@@ -385,7 +386,7 @@ config.TOOLS = [
+ 				value: 'Arial',
+ 				values() {
+ 					const user_font_names = Object.keys(config.user_fonts);
+-					return ['', '[Add Font...]', ...Array.from(new Set([...config.FONTS, ...user_font_names].sort()))];
++					return ['', ...Array.from(new Set([...config.FONTS, ...user_font_names].sort()))];
+ 				}
+ 			},
+ 			size: 40,
+diff --git a/src/js/tools/text.js b/src/js/tools/text.js
+index 2c2b0aa..34c5a27 100644
+--- a/src/js/tools/text.js
++++ b/src/js/tools/text.js
+@@ -51,7 +51,9 @@ fontLoadMap.set('Verdana', true);
+ 
+ function load_font_family({ family, variants }, successCallback) {
+ 	if (fontLoadMap.get(family) == null) {
+-		fontLoadMap.set(family, false);
++		fontLoadMap.set(family, true); /* urbit: no Google Fonts */
++	}
++	if (false) {
+ 		const loadPromise = new Promise((resolve, reject) => {
+ 			WebFont.load({
+ 				google: {
+diff --git a/webpack.config.js b/webpack.config.js
+index 30ba843..ed7df1c 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -8,7 +8,7 @@ module.exports = {
+ 	output: {
+ 		path: path.resolve(__dirname, 'dist'),
+ 		filename: 'bundle.js',
+-		publicPath: '/dist/'
++		publicPath: ''
+ 	},
+ 	resolve: {
+ 		extensions: ['.js', '.css'],
+@@ -45,7 +45,7 @@ module.exports = {
+ 			VERSION: JSON.stringify(require("./package.json").version)
+ 		}),
+ 	],
+-	devtool: "cheap-module-source-map",
++	devtool: false,
+ 	devServer: {
+ 		// host: '0.0.0.0',
+ 		//contentBase: "./",

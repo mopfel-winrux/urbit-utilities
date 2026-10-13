@@ -1,0 +1,10 @@
+:~  title+'draw.io'
+    info+'Diagrams, flowcharts and whiteboards'
+    color+0xf2.abee
+    image+'/drawio/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/jgraph/drawio'
+    license+'Apache-2.0'
+    base+'drawio'
+    site+/drawio
+==

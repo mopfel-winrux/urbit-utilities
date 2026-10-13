@@ -1,0 +1,133 @@
+diff --git a/next.config.ts b/next.config.ts
+index c85f4bf..18d0005 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -6,10 +6,13 @@ const nextConfig: NextConfig = {
+ 
+ 
+   // Uncomment for static build ('out' folder will be generated)  when using `npm run build`
+-  // output: "export",
+-  // images: {
+-  //   unoptimized: true,
+-  // },
++  // urbit: static export served by the ship under /typst
++  output: "export",
++  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
++  productionBrowserSourceMaps: false,
++  images: {
++    unoptimized: true,
++  },
+   // basePath: "/typst-online-editor-static", // Use the name you want your static repo to be named
+   // assetPrefix: "/typst-online-editor-static",
+ };
+diff --git a/public/fonts/todo-add-fonts.txt b/public/fonts/todo-add-fonts.txt
+deleted file mode 100644
+index 4d8c996..0000000
+--- a/public/fonts/todo-add-fonts.txt
++++ /dev/null
+@@ -1,24 +0,0 @@
+-Get them from here:
+-
+-https://cdn.jsdelivr.net/gh/typst/typst-assets@0.11.0/files/fonts/
+-
+-FONTS:
+-
+-DejaVuSansMono.ttf 	332.73 KB
+-DejaVuSansMono-Bold.ttf 	324.21 KB
+-DejaVuSansMono-BoldOblique.ttf 	247.64 KB
+-DejaVuSansMono-Oblique.ttf 	246.03 KB
+-LinLibertine_R.ttf 	787.95 KB
+-LinLibertine_RB.ttf 	731.05 KB
+-LinLibertine_RBI.ttf 	521.03 KB
+-LinLibertine_RI.ttf 	704.43 KB
+-NewCM10-Bold.otf 	493.63 KB
+-NewCM10-BoldItalic.otf 	445.81 KB
+-NewCM10-Italic.otf 	460.5 KB
+-NewCM10-Regular.otf 	560.52 KB
+-NewCMMath-Book.otf 	1.19 MB
+-NewCMMath-Regular.otf
+-
+-LATER ON:
+-
+-Add even more fonts.
+\ No newline at end of file
+diff --git a/src/lib/pdf/pdfjs.ts b/src/lib/pdf/pdfjs.ts
+index 644383a..94ef43e 100644
+--- a/src/lib/pdf/pdfjs.ts
++++ b/src/lib/pdf/pdfjs.ts
+@@ -4,7 +4,8 @@ export async function getPdfjs() {
+ 	if (!pdfjsPromise) {
+ 		pdfjsPromise = import('pdfjs-dist').then((mod) => {
+ 			// Use CDN for PDF.js worker in Next.js
+-			mod.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${mod.version}/build/pdf.worker.min.mjs`;
++			// urbit: vendored worker (build.sh copies it from pdfjs-dist) instead of the jsdelivr CDN
++			mod.GlobalWorkerOptions.workerSrc = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/pdfjs/pdf.worker.min.mjs`;
+ 			// PDF.js 的 viewer（`pdfjs-dist/web/pdf_viewer.mjs`）会从 `globalThis.pdfjsLib` 读取核心 API。
+ 			(globalThis as unknown as { pdfjsLib?: typeof import('pdfjs-dist') }).pdfjsLib = mod;
+ 			return mod;
+diff --git a/src/lib/typst/typst.worker.ts b/src/lib/typst/typst.worker.ts
+index 4fba42f..5123d65 100644
+--- a/src/lib/typst/typst.worker.ts
++++ b/src/lib/typst/typst.worker.ts
+@@ -75,25 +75,40 @@ const publicBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+ const TYPST_WASM_URL = `${publicBasePath}/wasm/typst_ts_web_compiler_bg.wasm`;
+ 
+ 
++// urbit: Typst's default fonts (typst-assets, vendored by build.sh into
++// public/fonts/typst) plus IBM Plex Sans, all served under the base path
+ const CORE_FONTS: string[] = [
+-	// IBM Plex Sans (Modern UI fonts)
+-	'/fonts/IBMPlexSans-Regular.ttf',
+-	'/fonts/IBMPlexSans-Bold.ttf',
+-	// Math fonts (Critical for mathematical formulas)
+-	'/fonts/NewCMMath-Regular.otf',
+-	'/fonts/NewCMMath-Book.otf'
+-];
++	'IBMPlexSans-Regular.ttf',
++	'IBMPlexSans-Bold.ttf',
++	'typst/LibertinusSerif-Regular.otf',
++	'typst/LibertinusSerif-Bold.otf',
++	'typst/LibertinusSerif-Italic.otf',
++	'typst/LibertinusSerif-BoldItalic.otf',
++	'typst/LibertinusSerif-Semibold.otf',
++	'typst/LibertinusSerif-SemiboldItalic.otf',
++	'typst/NewCM10-Regular.otf',
++	'typst/NewCM10-Bold.otf',
++	'typst/NewCM10-Italic.otf',
++	'typst/NewCM10-BoldItalic.otf',
++	'typst/NewCMMath-Regular.otf',
++	'typst/NewCMMath-Book.otf',
++	'typst/NewCMMath-Bold.otf',
++	'typst/DejaVuSansMono.ttf',
++	'typst/DejaVuSansMono-Bold.ttf',
++	'typst/DejaVuSansMono-Oblique.ttf',
++	'typst/DejaVuSansMono-BoldOblique.ttf'
++].map((f) => `${publicBasePath}/fonts/${f}`);
+ 
+ const EMOJI_FONTS: string[] = [
+ 	// Emoji support (Noto Color Emoji ~9MB) - Loaded on demand
+-	'/fonts/NotoColorEmoji.ttf'
++	`${publicBasePath}/fonts/NotoColorEmoji.ttf`
+ ];
+ 
+ const CJK_FONTS: string[] = [
+ 	// CJK (Chinese/Japanese/Korean) fonts - Loaded on demand
+ 	// Note: These are large files (~15-20MB each)
+-	'/fonts/NotoSansCJKsc-Regular.otf',
+-	'/fonts/NotoSansCJKsc-Bold.otf'
++	`${publicBasePath}/fonts/NotoSansCJKsc-Regular.otf`,
++	`${publicBasePath}/fonts/NotoSansCJKsc-Bold.otf`
+ ];
+ 
+ // ============================================================================
+@@ -151,8 +166,9 @@ async function createCompilerWithFonts(fonts: string[]): Promise<TypstCompiler>
+ 	await compiler.init({
+ 		getModule: fetchWasmModule,
+ 		beforeBuild: [
++			// urbit: no default font assets from jsdelivr; the same fonts are in CORE_FONTS
+ 			loadFonts(absoluteFonts, {
+-				assets: ['text']
++				assets: false
+ 			}),
+ 			withAccessModel(accessModel),
+ 			withPackageRegistry(packageRegistry)

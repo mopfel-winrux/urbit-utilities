@@ -1,0 +1,198 @@
+diff --git a/packages/app/config/urbit.json b/packages/app/config/urbit.json
+new file mode 100644
+index 0000000..2587f0f
+--- /dev/null
++++ b/packages/app/config/urbit.json
+@@ -0,0 +1,69 @@
++{
++  "appName": "Snort",
++  "appNameCapitalized": "Snort",
++  "appTitle": "Snort - Nostr",
++  "hostname": "snort.social",
++  "nip05Domain": "snort.social",
++  "icon": "/snort/nostrich_512.png",
++  "navLogo": null,
++  "publicDir": "public/snort",
++  "httpCache": "",
++  "animalNamePlaceholders": false,
++  "defaultZapPoolFee": 1,
++  "features": {
++    "analytics": false,
++    "subscriptions": false,
++    "deck": false,
++    "zapPool": false,
++    "communityLeaders": false,
++    "nostrAddress": true,
++    "pushNotifications": false
++  },
++  "signUp": {
++    "quickStart": false,
++    "defaultFollows": [
++      "npub1sn0rtcjcf543gj4wsg7fa59s700d5ztys5ctj0g69g2x6802npjqhjjtws"
++    ]
++  },
++  "defaultPreferences": {
++    "hideMutedNotes": false,
++    "defaultRootTab": "following"
++  },
++  "media": {
++    "bypassImgProxyError": false,
++    "preferLargeMedia": true
++  },
++  "communityLeaders": {
++    "list": "naddr1qq4xc6tnw3ez6vp58y6rywpjxckngdtyxukngwr9vckkze33vcknzcnrxcenje35xqmn2cczyp3lucccm3v9s087z6qslpkap8schltk427zfgqgrn3g2menq5zw6qcyqqq82vqprpmhxue69uhhyetvv9ujuumwdae8gtnnda3kjctv7rajfl"
++  },
++  "noteCreatorToast": false,
++  "hideFromNavbar": [],
++  "deckSubKind": 1,
++  "showPowIcon": true,
++  "showNip05": true,
++  "eventLinkPrefix": "nevent",
++  "profileLinkPrefix": "nprofile",
++  "defaultRelays": {
++    "wss://relay.snort.social/": {
++      "read": true,
++      "write": true
++    },
++    "wss://nostr.wine/": {
++      "read": true,
++      "write": false
++    },
++    "wss://relay.damus.io/": {
++      "read": true,
++      "write": true
++    },
++    "wss://nos.lol/": {
++      "read": true,
++      "write": true
++    }
++  },
++  "alby": {
++    "clientId": "pohiJjPhQR",
++    "clientSecret": "GAl1YKLA3FveK1gLBYok"
++  },
++  "chatChannels": []
++}
+\ No newline at end of file
+diff --git a/packages/app/public/snort/manifest.json b/packages/app/public/snort/manifest.json
+index e31058d..6d72ad3 100644
+--- a/packages/app/public/snort/manifest.json
++++ b/packages/app/public/snort/manifest.json
+@@ -22,7 +22,7 @@
+   "protocol_handlers": [
+     {
+       "protocol": "web+nostr",
+-      "url": "/%s"
++      "url": "/snort/%s"
+     }
+   ],
+   "screenshots": [],
+diff --git a/packages/app/src/Components/Embed/LinkPreview.tsx b/packages/app/src/Components/Embed/LinkPreview.tsx
+index bc8ec02..6a0c95a 100644
+--- a/packages/app/src/Components/Embed/LinkPreview.tsx
++++ b/packages/app/src/Components/Embed/LinkPreview.tsx
+@@ -8,7 +8,9 @@ import { type LinkPreviewData, NostrServices } from "@/External"
+ import { ProxyImg } from "../ProxyImg"
+ import GenericPlayer from "./GenericPlayer"
+ 
+-async function fetchUrlPreviewInfo(url: string) {
++async function fetchUrlPreviewInfo(url: string): Promise<LinkPreviewData | undefined> {
++  // urbit: link previews go through a third-party service; disabled
++  if (url) return undefined
+   const api = new NostrServices()
+   try {
+     return await api.linkPreview(url.endsWith(")") ? url.slice(0, -1) : url)
+diff --git a/packages/app/src/Utils/Login/Preferences.ts b/packages/app/src/Utils/Login/Preferences.ts
+index 3a1cc05..b58b3c3 100644
+--- a/packages/app/src/Utils/Login/Preferences.ts
++++ b/packages/app/src/Utils/Login/Preferences.ts
+@@ -122,15 +122,15 @@ export const DefaultPreferences = {
+   confirmReposts: false,
+   showDebugMenus: true,
+   autoShowLatest: false,
+-  imgProxyConfig: DefaultImgProxy,
++  imgProxyConfig: undefined,
+   defaultRootTab: "following",
+   defaultZapAmount: 50,
+   autoZap: false,
+-  telemetry: true,
++  telemetry: false,
+   showBadges: false,
+   showStatus: true,
+   checkSigs: true,
+-  autoTranslate: true,
++  autoTranslate: false,
+   hideMutedNotes: false,
+   muteWithWoT: false,
+   showContentWarningPosts: false,
+diff --git a/packages/app/src/Utils/index.ts b/packages/app/src/Utils/index.ts
+index 7cdc9cf..737ac34 100644
+--- a/packages/app/src/Utils/index.ts
++++ b/packages/app/src/Utils/index.ts
+@@ -415,7 +415,8 @@ export function kvToObject<T>(o: string, sep?: string) {
+ }
+ 
+ export function defaultAvatar(input?: string) {
+-  if (isOffline()) return Nostrich
++  // urbit: no third-party avatar service
++  return Nostrich
+   const key = (input?.length ?? 0) === 0 ? "missing" : input
+   return `https://nostr-rs-api.v0l.io/avatar/${isHalloween() ? "zombies" : "cyberpunks"}/${key}.webp`
+ }
+diff --git a/packages/app/src/index.tsx b/packages/app/src/index.tsx
+index 812b99d..2d05f56 100644
+--- a/packages/app/src/index.tsx
++++ b/packages/app/src/index.tsx
+@@ -248,7 +248,7 @@ const routes = [
+   },
+ ] as Array<RouteObject>
+ 
+-const router = createBrowserRouter(routes)
++const router = createBrowserRouter(routes, { basename: "/snort" })
+ 
+ const root = ReactDOM.createRoot(unwrap(document.getElementById("root")))
+ root.render(
+diff --git a/packages/app/vite.config.ts b/packages/app/vite.config.ts
+index e06ee0f..9b7d9b2 100644
+--- a/packages/app/vite.config.ts
++++ b/packages/app/vite.config.ts
+@@ -8,6 +8,7 @@ import { vitePluginVersionMark } from "vite-plugin-version-mark"
+ import tailwindcss from "@tailwindcss/vite"
+ 
+ export default defineConfig({
++  base: "/snort/",
+   plugins: [
+     tailwindcss(),
+     //basicSsl(),
+@@ -31,22 +32,6 @@ export default defineConfig({
+           .replace(/{{OG_IMAGE}}/g, `https://${hostname}${icon}`)
+       },
+     },
+-    VitePWA({
+-      strategies: "injectManifest",
+-      injectRegister: "script",
+-      srcDir: "src",
+-      filename: "service-worker.ts",
+-      registerType: "autoUpdate",
+-      devOptions: {
+-        enabled: false,
+-        type: "module",
+-      },
+-    }),
+-    visualizer({
+-      open: false,
+-      gzipSize: true,
+-      filename: "build/stats.html",
+-    }),
+     vitePluginVersionMark({
+       name: "snort",
+       ifGitSHA: true,
+@@ -66,7 +51,7 @@ export default defineConfig({
+   build: {
+     outDir: "build",
+     commonjsOptions: { transformMixedEsModules: true },
+-    sourcemap: true,
++    sourcemap: false,
+   },
+   clearScreen: false,
+   publicDir: appConfig.get("publicDir"),

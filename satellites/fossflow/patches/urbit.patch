@@ -1,0 +1,52 @@
+diff --git a/packages/fossflow-app/src/i18n.ts b/packages/fossflow-app/src/i18n.ts
+index c522862..e83cae1 100644
+--- a/packages/fossflow-app/src/i18n.ts
++++ b/packages/fossflow-app/src/i18n.ts
+@@ -13,6 +13,7 @@ i18n
+   .use(initReactI18next)
+   .init({
+     fallbackLng: 'en-US',
++    load: 'currentOnly', // urbit: only xx-YY files exist; don't request xx.json (404)
+     debug: process.env.NODE_ENV === 'development',
+     interpolation: {
+       escapeValue: false
+diff --git a/packages/fossflow-app/src/index.tsx b/packages/fossflow-app/src/index.tsx
+index 101a72f..4ffe4d5 100644
+--- a/packages/fossflow-app/src/index.tsx
++++ b/packages/fossflow-app/src/index.tsx
+@@ -4,7 +4,6 @@ import './index.css';
+ import 'react-quill-new/dist/quill.snow.css';
+ import App from './App';
+ import reportWebVitals from './reportWebVitals';
+-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+ import { ErrorBoundary } from 'react-error-boundary';
+ import ErrorBoundaryFallbackUI from './components/ErrorBoundary';
+ import {I18nextProvider} from 'react-i18next';
+@@ -28,13 +27,4 @@ root.render(
+ // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+ reportWebVitals();
+ 
+-// Service worker registration - only in production for PWA functionality
+-if (process.env.NODE_ENV === 'production') {
+-  serviceWorkerRegistration.register({
+-    onSuccess: () => console.log('Service worker registered successfully'),
+-    onUpdate: () => console.log('Service worker update available')
+-  });
+-} else {
+-  // Disable service worker in development to avoid cache issues
+-  serviceWorkerRegistration.unregister();
+-}
++// urbit: the satellite's service worker is installed by kit/pwa.py
+diff --git a/packages/fossflow-app/src/services/storageService.ts b/packages/fossflow-app/src/services/storageService.ts
+index de2f653..237dfd9 100644
+--- a/packages/fossflow-app/src/services/storageService.ts
++++ b/packages/fossflow-app/src/services/storageService.ts
+@@ -31,6 +31,8 @@ class ServerStorage implements StorageService {
+   }
+ 
+   async isAvailable(): Promise<boolean> {
++    // urbit: there is no FossFLOW storage backend on the ship; browser storage only
++    if (this.baseUrl === '') return false;
+     // Re-check availability if cache is stale
+     const now = Date.now();
+     if (this.available !== null &&

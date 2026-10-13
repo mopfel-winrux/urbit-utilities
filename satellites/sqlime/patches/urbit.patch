@@ -1,0 +1,320 @@
+diff --git a/about.html b/about.html
+index 03a12ed..7b0d77c 100644
+--- a/about.html
++++ b/about.html
+@@ -16,10 +16,10 @@
+     <meta name="twitter:card" content="summary_large_image" />
+     <meta name="theme-color" content="#ffffff">
+ 
+-    <link rel="icon" href="/img/favicon.ico" sizes="any">
+-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+-    <link rel="manifest" href="/site.webmanifest">
++    <link rel="icon" href="img/favicon.ico" sizes="any">
++    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
++    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
++    <link rel="manifest" href="site.webmanifest">
+ 
+     <link rel="stylesheet" href="css/awsm.css">
+     <link rel="stylesheet" href="css/article.css">
+@@ -29,7 +29,7 @@
+     <header>
+         <h3>
+             <a class="logo" href="javascript:back()">
+-                <img src="/img/favicon-64x64.png">
++                <img src="img/favicon-64x64.png">
+                 sqlime
+             </a>
+         </h3>
+@@ -39,7 +39,7 @@
+         <article>
+             <h1>About</h1>
+             <p>
+-                <strong><a href="/">Sqlime</a></strong> is an online SQLite playground
++                <strong><a href="./">Sqlime</a></strong> is an online SQLite playground
+                 for debugging and sharing SQL snippets.
+             </p>
+             <figure>
+@@ -188,7 +188,7 @@
+                 to stay on top of new features
+             </p>
+             <p>
+-                <a href="/"><strong>🍋 Use Sqlime</strong></a>
++                <a href="./"><strong>🍋 Use Sqlime</strong></a>
+                 to debug and share SQL snippets
+             </p>
+ 
+diff --git a/functions.html b/functions.html
+index 46dc6ec..5ab9c4c 100644
+--- a/functions.html
++++ b/functions.html
+@@ -16,10 +16,10 @@
+     <meta name="twitter:card" content="summary_large_image" />
+     <meta name="theme-color" content="#ffffff">
+ 
+-    <link rel="icon" href="/img/favicon.ico" sizes="any">
+-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+-    <link rel="manifest" href="/site.webmanifest">
++    <link rel="icon" href="img/favicon.ico" sizes="any">
++    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
++    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
++    <link rel="manifest" href="site.webmanifest">
+ 
+     <link rel="stylesheet" href="css/awsm.css">
+     <link rel="stylesheet" href="css/article.css">
+@@ -28,8 +28,8 @@
+ <body>
+     <header>
+         <h3>
+-            <a class="logo" href="/">
+-                <img src="/img/favicon-64x64.png">
++            <a class="logo" href="./">
++                <img src="img/favicon-64x64.png">
+                 sqlime
+             </a>
+         </h3>
+@@ -302,7 +302,7 @@
+                 <a href="https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md#uuid4">uuid4</a><br>
+             </p>
+ 
+-            <p><a href="/">← back</a></p>
++            <p><a href="./">← back</a></p>
+         </article>
+     </main>
+     <footer>
+diff --git a/index.html b/index.html
+index f1b31ef..326bb3b 100644
+--- a/index.html
++++ b/index.html
+@@ -16,10 +16,10 @@
+     <meta name="twitter:card" content="summary_large_image" />
+     <meta name="theme-color" content="#ffffff">
+ 
+-    <link rel="icon" href="/img/favicon.ico" sizes="any">
+-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+-    <link rel="manifest" href="/site.webmanifest">
++    <link rel="icon" href="img/favicon.ico" sizes="any">
++    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
++    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
++    <link rel="manifest" href="site.webmanifest">
+ 
+     <link rel="stylesheet" href="css/core.css">
+     <link rel="stylesheet" href="css/layout.css">
+@@ -33,7 +33,7 @@
+         <header class="header">
+             <h1>
+                 <a id="reset" href="./" class="header-logo">
+-                    <img src="/img/favicon-64x64.png">
++                    <img src="img/favicon-64x64.png">
+                 </a>
+                 <span>SQLite Playground</span> &nbsp;//
+                 <db-name id="db-name" class="db-name"></db-name>
+diff --git a/js/components/command-bar.js b/js/components/command-bar.js
+index a712511..e7fd74d 100644
+--- a/js/components/command-bar.js
++++ b/js/components/command-bar.js
+@@ -15,26 +15,12 @@ class CommandBar extends HTMLElement {
+         <path fill="currentColor" fill-rule="evenodd" stroke="none" d="M 50 0 L 50 800 L 750 400 Z" />
+     </svg>
+ </button>
+-<button id="save" data-action="save" title="⌃S or ⌘S">
+-    <svg viewBox="0 0 800 800" role="img">
+-        <path fill="currentColor" fill-rule="evenodd" stroke="none"
+-            d="M 601.372437 415.390747 C 561.532471 453.942871 543.332336 509.409302 552.772461 563.847412 L 570.252319 665.028564 L 478.652527 617.257263 C 454.492493 604.6474 427.292297 597.981201 400.012512 597.981201 C 372.692291 597.981201 345.492401 604.6474 321.332367 617.257263 L 229.732254 665.028564 L 247.252258 563.847412 C 256.652252 509.409302 238.452438 453.942871 198.612473 415.390747 L 124.532356 343.733154 L 226.932495 328.952179 C 282.01236 321.028656 329.572418 286.742554 354.212311 237.219238 L 400.012512 145.142761 L 445.812408 237.219238 C 470.412476 286.742554 518.012329 321.028656 573.052368 328.952179 L 675.492371 343.733154 L 601.372437 415.390747 Z M 778.052612 378.399963 C 821.01239 336.837921 797.332458 264.418823 737.932495 255.847778 L 586.972473 234.095398 C 563.372498 230.704773 542.972534 215.999939 532.452393 194.781189 L 464.932404 59.08551 C 451.652313 32.381165 425.812347 19.047607 400.012512 19.047607 C 374.172546 19.047607 348.332275 32.381165 335.05249 59.08551 L 267.572327 194.781189 C 257.01236 215.999939 236.612381 230.704773 213.052216 234.095398 L 62.092228 255.847778 C 2.692232 264.418823 -21.027775 336.837921 21.932257 378.399963 L 131.172394 484.037842 C 148.252365 500.53363 156.052368 524.30481 152.012421 547.619019 L 126.212273 696.799988 C 118.172203 743.237915 155.372253 780.952393 197.57225 780.952393 C 208.692276 780.952393 220.212234 778.323792 231.292435 772.533569 L 366.292328 702.094971 C 376.852264 696.609375 388.412323 693.828491 400.012512 693.828491 C 411.572571 693.828491 423.132324 696.609375 433.692291 702.094971 L 568.732544 772.533569 C 579.8125 778.323792 591.292297 780.952393 602.412354 780.952393 C 644.612366 780.952393 681.812378 743.237915 673.772583 696.799988 L 648.012573 547.619019 C 643.972351 524.30481 651.732544 500.53363 668.8125 484.037842 L 778.052612 378.399963 Z" />
+-    </svg>
+-    share
+-</button>
+ <button id="show-tables" data-action="showTables" title="⌃/ or ⌘/">
+     <svg viewBox="0 0 800 800" role="img">
+         <path fill="currentColor" fill-rule="evenodd" stroke="none"
+             d="M 519.999756 704.761902 L 719.999756 704.761902 L 719.999756 514.285706 L 519.999756 514.285706 L 519.999756 704.761902 Z M 439.999542 780.952393 L 800 780.952393 L 800 438.095245 L 439.999542 438.095245 L 439.999542 780.952393 Z M 519.999756 285.714294 L 719.999756 285.714294 L 719.999756 95.238098 L 519.999756 95.238098 L 519.999756 285.714294 Z M 439.999542 361.904755 L 800 361.904755 L 800 19.047607 L 439.999542 19.047607 L 439.999542 361.904755 Z M 80.000229 704.761902 L 280.000244 704.761902 L 280.000244 95.238098 L 80.000229 95.238098 L 80.000229 704.761902 Z M 0 780.952393 L 360.000458 780.952393 L 360.000458 19.047607 L 0 19.047607 L 0 780.952393 Z" />
+     </svg>
+     tables
+-</button>
+-<button id="ask-ai" data-action="askAi">
+-    <svg viewBox="0 0 800 800" role="img">
+-        <path fill="currentColor" fill-rule="evenodd" stroke="none"
+-            d="M 720 393.027344 C 720 222.207031 576.439941 79.882813 400 79.882813 C 223.559998 79.882813 80 222.207031 80 393.027344 L 80 662.363281 C 80 684.414063 97.919998 703.339844 120 703.339844 C 142.080002 703.339844 160 686.484375 160 664.453125 C 160 642.363281 177.919998 626.582031 200 626.582031 C 222.080002 626.582031 240 648.59375 240 670.644531 C 240 692.714844 257.919983 718.886719 280 718.886719 L 320 718.886719 C 342.080017 718.886719 360 694.804688 360 672.714844 C 360 650.664063 377.919983 626.582031 400 626.582031 C 422.080017 626.582031 440 648.59375 440 670.644531 C 440 692.714844 457.919983 718.886719 480 718.886719 L 520 718.886719 C 542.080017 718.886719 560 692.714844 560 670.644531 C 560 648.59375 577.919983 622.421875 600 622.421875 C 622.080017 622.421875 640 640.3125 640 662.363281 C 640 684.414063 657.919983 702.304688 680 702.304688 C 702.080017 702.304688 720 684.414063 720 662.363281 L 720 393.027344 Z M 800 393.027344 L 800 702.304688 C 800 746.40625 764.199951 798.75 720 798.75 L 689.559998 798.75 C 667.47998 798.75 644.52002 785.527344 630.440002 768.554688 C 623.200012 759.824219 612.279968 748.027344 600 748.027344 C 587.720032 748.027344 576.799988 757.734375 569.559998 766.484375 C 555.47998 783.457031 532.52002 798.75 510.440002 798.75 L 489.559998 798.75 C 467.480011 798.75 444.519989 785.527344 430.440002 768.554688 C 423.200012 759.824219 412.279999 748.027344 400 748.027344 C 387.720001 748.027344 376.799988 757.734375 369.559998 766.484375 C 330.639984 813.339844 263.839996 808.457031 230.839996 768.046875 C 223.52002 759.140625 212.440002 747.1875 200 747.1875 C 187.559998 747.1875 176.47998 757.050781 169.160004 765.957031 C 155.039993 783.300781 131.800003 798.75 109.440002 798.75 L 80 798.75 C 35.799999 798.75 0 746.40625 0 702.304688 L 0 393.027344 C 0 177.851563 179.080017 0 400 0 C 620.920044 0 800 177.851563 800 393.027344 L 800 393.027344 Z M 560 342.871094 L 560 422.734375 C 560 444.785156 577.919983 462.675781 600 462.675781 C 622.080017 462.675781 640 444.785156 640 422.734375 L 640 342.871094 C 640 320.820313 622.080017 302.929688 600 302.929688 C 577.919983 302.929688 560 320.820313 560 342.871094 L 560 342.871094 Z M 240 342.871094 L 240 422.734375 C 240 444.785156 222.080002 462.675781 200 462.675781 C 177.919998 462.675781 160 444.785156 160 422.734375 L 160 342.871094 C 160 320.820313 177.919998 302.929688 200 302.929688 C 222.080002 302.929688 240 320.820313 240 342.871094 L 240 342.871094 Z" />
+-    </svg>
+-    <span class="hidden-mobile">ask AI</span>
+ </button>`;
+     }
+ }
+diff --git a/js/components/toolbar.js b/js/components/toolbar.js
+index 66d5121..e55963d 100644
+--- a/js/components/toolbar.js
++++ b/js/components/toolbar.js
+@@ -14,13 +14,6 @@ class Toolbar extends HTMLElement {
+     open file <input type="file">
+ </label>
+ <button title="⌃U or ⌘U" class="button button--small">open url</button>
+-<a href="settings.html" class="button button--small">
+-    <svg viewBox="0 0 800 800" role="img">
+-        <path fill="currentColor" fill-rule="evenodd" stroke="none"
+-            d="M 720.000061 171.428589 L 720.000061 19.047607 L 640 19.047607 L 640 171.428589 L 560 171.428589 L 560 247.619019 L 640 247.619019 L 640 780.952393 L 720.000061 780.952393 L 720.000061 247.619019 L 800 247.619019 L 800 171.428589 L 720.000061 171.428589 Z M 439.999969 19.047607 L 360.000031 19.047607 L 360.000031 361.904755 L 279.999939 361.904755 L 279.999939 438.095245 L 360.000031 438.095245 L 360.000031 780.952393 L 439.999969 780.952393 L 439.999969 438.095245 L 520.000061 438.095245 L 520.000061 361.904755 L 439.999969 361.904755 L 439.999969 19.047607 Z M 160.000031 552.380981 L 239.999969 552.380981 L 239.999969 628.571411 L 160.000031 628.571411 L 160.000031 780.952393 L 79.999939 780.952393 L 79.999939 628.571411 L 0 628.571411 L 0 552.380981 L 79.999939 552.380981 L 79.999939 19.047607 L 160.000031 19.047607 L 160.000031 552.380981 Z" />
+-    </svg>
+-    settings
+-</a>
+ <a href="about.html" class="button button--small button-help">
+     <svg viewBox="0 0 800 800" role="img">
+         <path fill="none" stroke="currentColor" stroke-width="156" stroke-linecap="round"
+@@ -32,8 +25,7 @@ class Toolbar extends HTMLElement {
+         this.btnOpenFile = this.querySelector(":nth-child(1)");
+         this.file = this.btnOpenFile.querySelector("input");
+         this.btnOpenUrl = this.querySelector(":nth-child(2)");
+-        this.btnSettings = this.querySelector(":nth-child(3)");
+-        this.btnAbout = this.querySelector(":nth-child(4)");
++        this.btnAbout = this.querySelector(":nth-child(3)");
+     }
+ 
+     listen() {
+diff --git a/js/index.js b/js/index.js
+index 3115bb4..c7b2d30 100644
+--- a/js/index.js
++++ b/js/index.js
+@@ -43,7 +43,6 @@ const shortcuts = {
+         ui.toolbar.btnOpenFile.click();
+     },
+     u: openUrl,
+-    s: save,
+     "/": showTables,
+ };
+ 
+@@ -282,10 +281,6 @@ function showWelcome() {
+     const demo = actionButton("loadDemo", "demo database");
+     let message = `<p>${MESSAGES.invite}<br>or load the ${demo}.</p>`;
+     message += `<p>Click the logo anytime to start from scratch.</p>`;
+-    if (!gister.hasCredentials()) {
+-        const settings = actionButton("visit", "settings", "settings");
+-        message += `<p>Visit ${settings} to enable sharing.</p>`;
+-    }
+     const functions = actionButton("visit", "Functions", "functions");
+     const about = actionButton("visit", "About", "about");
+     message += `<p>${functions} • ${about}</p>`;
+diff --git a/js/settings.js b/js/settings.js
+deleted file mode 100644
+index 1ee72d2..0000000
+--- a/js/settings.js
++++ /dev/null
+@@ -1,33 +0,0 @@
+-const ui = {
+-    settings: document.querySelector("#settings"),
+-    github: {
+-        username: document.querySelector("#github-username"),
+-        token: document.querySelector("#github-token"),
+-    },
+-    openai: {
+-        apikey: document.querySelector("#openai-apikey"),
+-    },
+-};
+-
+-ui.settings.addEventListener("submit", (event) => {
+-    event.preventDefault();
+-    localStorage.setItem("github.username", ui.github.username.value);
+-    localStorage.setItem("github.token", ui.github.token.value);
+-    localStorage.setItem("openai.apikey", ui.openai.apikey.value);
+-});
+-
+-ui.github.username.addEventListener("change", (event) => {
+-    localStorage.setItem("github.username", event.target.value);
+-});
+-
+-ui.github.token.addEventListener("change", (event) => {
+-    localStorage.setItem("github.token", event.target.value);
+-});
+-
+-ui.openai.apikey.addEventListener("change", (event) => {
+-    localStorage.setItem("openai.apikey", event.target.value);
+-});
+-
+-ui.github.username.value = localStorage.getItem("github.username") || "";
+-ui.github.token.value = localStorage.getItem("github.token") || "";
+-ui.openai.apikey.value = localStorage.getItem("openai.apikey") || "";
+diff --git a/settings.html b/settings.html
+deleted file mode 100644
+index 51440a7..0000000
+--- a/settings.html
++++ /dev/null
+@@ -1,56 +0,0 @@
+-<!DOCTYPE html>
+-<html lang="en">
+-
+-<head>
+-    <title>Sqlime / Settings</title>
+-
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <meta name="theme-color" content="#ffffff">
+-
+-    <link rel="icon" href="/img/favicon.ico" sizes="any">
+-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+-    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+-    <link rel="manifest" href="/site.webmanifest">
+-
+-    <link rel="stylesheet" href="css/awsm.css">
+-</head>
+-
+-<body>
+-    <header>
+-        <h1>Settings</h1>
+-    </header>
+-    <main>
+-        <article>
+-            <p>All settings are optional, you can use Sqlime without them.</p>
+-            <form id="settings">
+-                <fieldset>
+-                    <legend>GitHub credentials (to enable sharing)</legend>
+-                    <label for="github-username">Username</label>
+-                    <input id="github-username" type="text">
+-                    <label for="github-token">API token</label>
+-                    <input id="github-token" type="text">
+-                    <p>
+-                        This is <strong>not</strong> your GitHub password.
+-                        Create an API token with a 'gist' scope in the
+-                        <a href="https://github.com/settings/tokens" target="_blank">GitHub settings</a>
+-                    </p>
+-                </fieldset>
+-                <br>
+-                <fieldset>
+-                    <legend>OpenAI credentials (to enable 'Ask AI' feature)</legend>
+-                    <label for="openai-apikey">API key</label>
+-                    <input id="openai-apikey" type="text">
+-                    <p>
+-                        Create an API key in the
+-                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI account</a>
+-                    </p>
+-                </fieldset>
+-            </form>
+-            <p><a href="javascript:history.go(-1)">← back</a></p>
+-        </article>
+-    </main>
+-    <script type="module" src="js/settings.js"></script>
+-</body>
+-
+-</html>
+\ No newline at end of file
+diff --git a/site.webmanifest b/site.webmanifest
+index b184f97..812cd84 100644
+--- a/site.webmanifest
++++ b/site.webmanifest
+@@ -1,14 +1,14 @@
+ {
+-    "name": "",
+-    "short_name": "",
++    "name": "Sqlime - SQLite Playground",
++    "short_name": "Sqlime",
+     "icons": [
+         {
+-            "src": "/img/android-chrome-192x192.png",
++            "src": "img/android-chrome-192x192.png",
+             "sizes": "192x192",
+             "type": "image/png"
+         },
+         {
+-            "src": "/img/android-chrome-512x512.png",
++            "src": "img/android-chrome-512x512.png",
+             "sizes": "512x512",
+             "type": "image/png"
+         }

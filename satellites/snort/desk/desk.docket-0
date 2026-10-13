@@ -1,0 +1,10 @@
+:~  title+'Snort'
+    info+'Fast Nostr client'
+    color+0x1a.1a1a
+    image+'/snort/icon.png'
+    version+[0 1 0]
+    website+'https://github.com/v0l/snort'
+    license+'MIT'
+    base+'snort'
+    site+/snort
+==

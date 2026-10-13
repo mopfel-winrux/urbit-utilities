@@ -1,0 +1,26 @@
+{
+  "name": "jupyterlite-ship-drive",
+  "version": "0.1.0",
+  "description": "JupyterLite default contents drive backed by the Urbit %utilities store (WebDAV at /utilities/dav/jupyter/)",
+  "license": "MIT",
+  "keywords": [
+    "jupyterlab-extension"
+  ],
+  "main": "lib/index.js",
+  "files": [
+    "lib/*.js"
+  ],
+  "dependencies": {
+    "@jupyterlab/coreutils": "^6.6.4",
+    "@jupyterlab/services": "^7.6.4",
+    "@lumino/signaling": "^2.1.0"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "labextension"
+  },
+  "devDependencies": {
+    "@jupyter/builder": "1.2.3",
+    "@jupyterlab/core-meta": "4.6.4"
+  }
+}

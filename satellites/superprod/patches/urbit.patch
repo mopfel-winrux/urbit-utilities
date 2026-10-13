@@ -1,0 +1,128 @@
+diff --git a/angular.json b/angular.json
+index a923d4f..2196397 100644
+--- a/angular.json
++++ b/angular.json
+@@ -135,7 +135,7 @@
+                 "fonts": true
+               },
+               "outputHashing": "all",
+-              "sourceMap": true,
++              "sourceMap": false,
+               "namedChunks": false,
+               "aot": true,
+               "extractLicenses": true,
+diff --git a/packages/sync-providers/src/file-based/webdav/webdav-api.ts b/packages/sync-providers/src/file-based/webdav/webdav-api.ts
+index 1c9a6b1..61d3d83 100644
+--- a/packages/sync-providers/src/file-based/webdav/webdav-api.ts
++++ b/packages/sync-providers/src/file-based/webdav/webdav-api.ts
+@@ -24,6 +24,10 @@ import type { WebdavPrivateCfg } from './webdav.model';
+  */
+ const STRONG_ETAG_RE = /^"[\x21\x23-\x7e\x80-\xff]*"$/;
+ 
++/** urbit: same-origin %utilities WebDAV, authenticated by the ship's cookie. */
++const isUrbitDav = (baseUrl: string | null | undefined): boolean =>
++  !!baseUrl && baseUrl.includes('/utilities/dav/');
++
+ export interface WebdavApiDeps {
+   logger: SyncLogger;
+   /**
+@@ -508,8 +512,10 @@ export class WebdavApi {
+ 
+     try {
+       const auth = btoa(`${cfg.userName}:${cfg.password}`);
+-      const headers = {
+-        [WebDavHttpHeader.AUTHORIZATION]: `Basic ${auth}`,
++      const headers: Record<string, string> = {
++        ...(isUrbitDav(cfg.baseUrl)
++          ? {}
++          : { [WebDavHttpHeader.AUTHORIZATION]: `Basic ${auth}` }),
+         [WebDavHttpHeader.CONTENT_TYPE]: 'application/xml; charset=utf-8',
+         [WebDavHttpHeader.DEPTH]: '0',
+       };
+@@ -600,10 +606,13 @@ export class WebdavApi {
+       authHeaderVal = `Basic ${auth}`;
+     }
+ 
+-    const allHeaders = {
+-      [WebDavHttpHeader.AUTHORIZATION]: authHeaderVal,
+-      ...headers,
+-    };
++    // urbit: the ship's /utilities/dav/ authenticates with the login cookie
++    const allHeaders = isUrbitDav(cfg.baseUrl)
++      ? { ...headers }
++      : {
++          [WebDavHttpHeader.AUTHORIZATION]: authHeaderVal,
++          ...headers,
++        };
+ 
+     return this._deps.httpAdapter.request({
+       url,
+diff --git a/src/app/features/config/default-global-config.const.ts b/src/app/features/config/default-global-config.const.ts
+index 5fe1b08..3f3a32e 100644
+--- a/src/app/features/config/default-global-config.const.ts
++++ b/src/app/features/config/default-global-config.const.ts
+@@ -7,6 +7,7 @@ import {
+ import { TaskReminderOptionId } from '../tasks/task.model';
+ import { GlobalConfigState } from './global-config.model';
+ import { INBOX_PROJECT } from '../project/project.const';
++import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
+ import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
+ 
+ const minute = 60 * 1000;
+@@ -237,13 +238,14 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
+   },
+ 
+   sync: {
+-    isEnabled: false,
++    // urbit: sync to the ship's %utilities WebDAV out of the box
++    isEnabled: true,
+     // TODO maybe enable later if it works well
+     isCompressionEnabled: false,
+     isEncryptionEnabled: false,
+     // Absent: join the remote format; empty folders get EMPTY_FOLDER_SYNC_FORMAT.
+     encryptKey: null,
+-    syncProvider: null,
++    syncProvider: SyncProviderId.WebDAV,
+     syncInterval: minute,
+     isManualSyncOnly: false,
+ 
+diff --git a/src/app/op-log/sync-providers/credential-store.service.ts b/src/app/op-log/sync-providers/credential-store.service.ts
+index 615a6bb..7f5376f 100644
+--- a/src/app/op-log/sync-providers/credential-store.service.ts
++++ b/src/app/op-log/sync-providers/credential-store.service.ts
+@@ -37,6 +37,23 @@ interface SyncCredentialsDb extends DBSchema {
+ export type CredentialChangeCallback<PID extends SyncProviderId> =
+   CredentialChangeHandler<PID, PrivateCfgByProviderId<PID>>;
+ 
++/**
++ * urbit: WebDAV config for the ship's %utilities hub (same origin). The
++ * user name and password are placeholders: the hub authenticates with the
++ * ship's login cookie and no Authorization header is sent (webdav-api.ts).
++ */
++export const urbitWebdavDefaultCfg = (): {
++  baseUrl: string;
++  userName: string;
++  password: string;
++  syncFolderPath: string;
++} => ({
++  baseUrl: `${location.origin}/utilities/dav/superprod`,
++  userName: 'ship',
++  password: 'cookie',
++  syncFolderPath: 'super-productivity',
++});
++
+ /**
+  * Store for managing sync provider credentials.
+  *
+@@ -129,6 +146,11 @@ export class SyncCredentialStore<
+         );
+       }
+ 
++      // urbit: without saved credentials, WebDAV syncs to the ship's
++      // %utilities hub on the same origin (cookie auth, no password needed)
++      if (!loadedConfig && this._providerId === SyncProviderId.WebDAV) {
++        return urbitWebdavDefaultCfg() as PrivateCfgByProviderId<PID>;
++      }
+       return loadedConfig ?? null;
+     } catch (error) {
+       SyncLog.critical(`Failed to load credentials: ${error}`);

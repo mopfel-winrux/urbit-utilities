@@ -1,0 +1,127 @@
+diff --git a/assets/js/compression.js b/assets/js/compression.js
+index 7aab32c..83b7624 100644
+--- a/assets/js/compression.js
++++ b/assets/js/compression.js
+@@ -179,7 +179,7 @@ async function createCompressionOptions(currentProgress, file) {
+     onProgress: currentProgress,
+     preserveExif: false,
+     fileType: selectedFormat || undefined,
+-    libURL: `${location.origin}/assets/vendor/browser-image-compression.js`,
++    libURL: new URL("assets/vendor/browser-image-compression.js", document.baseURI).href,
+     alwaysKeepResolution: true,
+   };
+   if (state.controller) {
+diff --git a/assets/js/global.js b/assets/js/global.js
+index 0642973..62d61b7 100644
+--- a/assets/js/global.js
++++ b/assets/js/global.js
+@@ -74,7 +74,7 @@ app.config = {
+     useWebWorker: true,
+     preserveExif: false,
+     fileType: "image/png",
+-    libURL: `${location.origin}/assets/vendor/browser-image-compression.js`,
++    libURL: new URL("assets/vendor/browser-image-compression.js", document.baseURI).href,
+     alwaysKeepResolution: true,
+   },
+   qualityLimit: {
+@@ -97,7 +97,7 @@ app.config.avifPreProcessOptions = {
+   useWebWorker: true,
+   preserveExif: false,
+   fileType: "image/png",
+-  libURL: `${location.origin}/assets/vendor/browser-image-compression.js`,
++  libURL: new URL("assets/vendor/browser-image-compression.js", document.baseURI).href,
+   alwaysKeepResolution: true,
+ };
+ 
+diff --git a/index.html b/index.html
+index 28fb04b..ad55bae 100644
+--- a/index.html
++++ b/index.html
+@@ -62,7 +62,7 @@
+       sizes="16x16"
+       href="./assets/images/favicon-16x16.png"
+     />
+-    <link rel="manifest" href="/manifest.json" />
++    <link rel="manifest" href="./manifest.json" />
+     <meta name="theme-color" content="#191919" />
+   </head>
+ 
+@@ -1001,50 +1001,8 @@
+     <script type="text/javascript" src="./assets/js/download.js"></script>
+     <script type="text/javascript" src="./assets/js/events.js"></script>
+     <script>
+-      if ("serviceWorker" in navigator) {
+-        function promptUpdate(registration) {
+-          updateToast.classList.remove("hidden");
+-          updateToastRefreshButton.addEventListener("click", () => {
+-            if (registration.waiting) {
+-              registration.waiting.postMessage("SKIP_WAITING");
+-            }
+-          });
+-        }
+-
+-        if ("serviceWorker" in navigator) {
+-          window.addEventListener("load", async () => {
+-            const registration =
+-              await navigator.serviceWorker.register("/service-worker.js");
+-
+-            if (registration.waiting) {
+-              promptUpdate(registration);
+-            }
+-
+-            registration.addEventListener("updatefound", () => {
+-              if (registration.installing) {
+-                registration.installing.addEventListener("statechange", () => {
+-                  if (registration.waiting) {
+-                    if (navigator.serviceWorker.controller) {
+-                      promptUpdate(registration);
+-                    } else {
+-                      console.log("Service Worker initialized");
+-                    }
+-                  }
+-                });
+-              }
+-            });
+-
+-            let refreshing = false;
+-
+-            navigator.serviceWorker.addEventListener("controllerchange", () => {
+-              if (!refreshing) {
+-                window.location.reload();
+-                refreshing = true;
+-              }
+-            });
+-          });
+-        }
+-      }
++      // urbit: the app's own service worker (absolute paths, caches login
++      // redirects) is replaced by the kit worker that kit/pwa.py installs.
+ 
+       let deferredPrompt;
+       window.addEventListener("beforeinstallprompt", (e) => {
+diff --git a/manifest.json b/manifest.json
+index 44fbb60..3845b67 100644
+--- a/manifest.json
++++ b/manifest.json
+@@ -2,18 +2,18 @@
+   "name": "MAZANOKE",
+   "short_name": "MAZANOKE",
+   "description": "Privacy-respecting Image Optimizer",
+-  "start_url": "/index.html",
++  "start_url": "./",
+   "display": "standalone",
+   "background_color": "#191919",
+   "theme_color": "#191919",
+   "icons": [
+     {
+-      "src": "/assets/images/android-chrome-192x192.png",
++      "src": "./assets/images/android-chrome-192x192.png",
+       "sizes": "192x192",
+       "type": "image/png"
+     },
+     {
+-      "src": "/assets/images/android-chrome-512x512.png",
++      "src": "./assets/images/android-chrome-512x512.png",
+       "sizes": "512x512",
+       "type": "image/png"
+     }

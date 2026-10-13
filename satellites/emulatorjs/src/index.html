@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EmulatorJS</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: dark; --bg: #14161b; --panel: #1e2129; --fg: #e8e8ec; --mut: #9aa0ad; --acc: #7c5cff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #picker { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+  h1 { font-size: 24px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  h1 img { width: 32px; height: 32px; }
+  p { color: var(--mut); margin: 0 0 20px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+  label { display: grid; gap: 6px; font-weight: 600; }
+  select, input[type=file] { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid #3a3f4b;
+    border-radius: 8px; padding: 8px; width: 100%; }
+  button { font: inherit; font-weight: 600; color: #fff; background: var(--acc); border: 0; border-radius: 8px;
+    padding: 10px 16px; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  .hint { font-weight: 400; color: var(--mut); font-size: 13px; }
+  #err { color: #ff7a7a; min-height: 1em; }
+  #stage { display: none; height: 100%; flex-direction: column; }
+  #bar { display: flex; gap: 12px; align-items: center; padding: 6px 12px; background: var(--panel); }
+  #bar span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mut); }
+  #bar button { padding: 4px 12px; font-size: 13px; }
+  #wrap { flex: 1; min-height: 0; }
+  #game { width: 100%; height: 100%; }
+  body.playing #picker { display: none; }
+  body.playing #stage { display: flex; }
+</style>
+</head>
+<body>
+<main id="picker">
+  <h1><img src="icon.svg" alt="">EmulatorJS</h1>
+  <p>Play your own game files in the browser. Nothing is uploaded: the ROM is read from your computer and runs locally.</p>
+  <div class="card">
+    <label>ROM file
+      <input type="file" id="rom">
+      <span class="hint">.zip and .7z archives work too. The system is guessed from the file extension.</span>
+    </label>
+    <label>System
+      <select id="system"></select>
+    </label>
+    <div id="err"></div>
+    <button id="start" disabled>Start game</button>
+  </div>
+</main>
+<section id="stage">
+  <div id="bar"><span id="title"></span><button id="back" type="button">Load another game</button></div>
+  <div id="wrap"><div id="game"></div></div>
+</section>
+<script src="launcher.js"></script>
+</body>
+</html>

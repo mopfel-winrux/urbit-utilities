@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>js-dos</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="js-dos/js-dos.css">
+<style>
+  :root { color-scheme: dark; --bg: #101418; --panel: #1b2229; --fg: #e6e9ec; --mut: #98a2ad; --acc: #2fb36d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #picker { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+  #picker h1 { font-size: 24px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  #picker h1 img { width: 32px; height: 32px; }
+  #picker p { color: var(--mut); margin: 0 0 20px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+  .card label { display: grid; gap: 6px; font-weight: 600; }
+  .card select, .card input[type=file] { font: inherit; color: var(--fg); background: var(--bg);
+    border: 1px solid #36404a; border-radius: 8px; padding: 8px; width: 100%; }
+  .card button { font: inherit; font-weight: 600; color: #fff; background: var(--acc); border: 0;
+    border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+  .card button:disabled { opacity: .45; cursor: default; }
+  .hint { font-weight: 400; color: var(--mut); font-size: 13px; }
+  #err { color: #ff7a7a; min-height: 1em; }
+  #runrow[hidden] { display: none; }
+  #stage { display: none; height: 100%; flex-direction: column; }
+  #bar { display: flex; gap: 12px; align-items: center; padding: 6px 12px; background: var(--panel); }
+  #bar span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mut); }
+  #bar button { font: inherit; font-size: 13px; font-weight: 600; color: #fff; background: var(--acc);
+    border: 0; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+  #dos { flex: 1; min-height: 0; position: relative; }
+  body.playing #picker { display: none; }
+  body.playing #stage { display: flex; }
+</style>
+</head>
+<body>
+<main id="picker">
+  <h1><img src="icon.svg" alt="">js-dos</h1>
+  <p>Run DOS games and programs in the browser with DOSBox. Files are read from your computer and stay in this browser.</p>
+  <div class="card">
+    <label>Program
+      <input type="file" id="file" accept=".jsdos,.zip">
+      <span class="hint">A <b>.jsdos</b> bundle, or a <b>.zip</b> of a DOS program (it is mounted as drive C:).</span>
+    </label>
+    <label id="runrow" hidden>Run on start
+      <select id="run"></select>
+    </label>
+    <label>Emulator
+      <select id="backend">
+        <option value="dosbox">DOSBox</option>
+        <option value="dosboxX">DOSBox-X</option>
+      </select>
+      <span class="hint">DOSBox suits most games. DOSBox-X is slower but runs Windows 3.x/9x.</span>
+    </label>
+    <div id="err"></div>
+    <button id="start" disabled>Start</button>
+  </div>
+</main>
+<section id="stage">
+  <div id="bar"><span id="title"></span><button id="back" type="button">Load another program</button></div>
+  <div id="dos"></div>
+</section>
+<script type="module" src="js-dos/js-dos.js"></script>
+<script src="launcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#1b1f2a"/>
+  <path d="M20 52c10-16 26-24 44-24s34 8 44 24c-12-8-27-12-44-12s-32 4-44 12z" fill="#f37726"/>
+  <path d="M20 76c10 16 26 24 44 24s34-8 44-24c-12 8-27 12-44 12s-32-4-44-12z" fill="#f37726"/>
+  <circle cx="98" cy="30" r="7" fill="#9aa3b5"/>
+  <circle cx="27" cy="98" r="5" fill="#9aa3b5"/>
+  <text x="64" y="72" font-family="DejaVu Sans Mono, monospace" font-size="20" font-weight="bold" fill="#e8ebf2" text-anchor="middle">py</text>
+</svg>

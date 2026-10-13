@@ -1,0 +1,10 @@
+:~  title+'Mermaid Live'
+    info+'Diagrams from text with live preview'
+    color+0xf2.abee
+    image+'/mermaid/icon.svg'
+    version+[0 1 0]
+    website+'https://github.com/mermaid-js/mermaid-live-editor'
+    license+'MIT'
+    base+'mermaid'
+    site+/mermaid
+==
