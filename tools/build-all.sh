@@ -101,7 +101,7 @@ for d in "${DESKS[@]}"; do
   [[ ${RESULT[$d]:-} == ok* ]] || fail=1
 done
 if [ $fail = 0 ]; then
-  say "All built. Next: tools/publish.sh /path/to/pier   (see PUBLISHING.md)"
+  say "All built. Next: tools/publish.sh /path/to/pier   (see README.md)"
 else
   die "Some desks failed to build."
 fi
