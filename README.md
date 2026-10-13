@@ -31,7 +31,7 @@ example `nvm install 22`). Headless Chrome is downloaded automatically if it's
 missing. A full build takes about 20 GB of disk and a while.
 
 ```sh
-git clone <this repo> utilities && cd utilities
+git clone https://github.com/mopfel-winrux/urbit-utilities && cd urbit-utilities
 tools/build-all.sh                    # builds every satellite, then the hub
 tools/publish.sh ~/path/to/pier       # walks you through committing each desk
 ```
