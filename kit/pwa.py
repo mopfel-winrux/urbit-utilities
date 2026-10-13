@@ -28,13 +28,13 @@ def desk_name(desk):
     return re.search(r'\+\+\s+web-root\s+\^-\s+\(list @t\)\s+/([a-z0-9-]+)', cfg).group(1)
 
 
-def docket_field(desk, field):
+def catalog_title(name):
+    """The app's title from catalog.json (used when the manifest has no name)."""
     try:
-        s = open(os.path.join(desk, 'desk.docket-0')).read()
-    except OSError:
+        apps = json.load(open(os.path.join(os.path.dirname(KIT), 'catalog.json')))
+    except (OSError, ValueError):
         return None
-    m = re.search(field + r"\+'([^']*)'", s)
-    return m.group(1) if m else None
+    return next((a.get('title') for a in apps if a.get('desk') == name), None)
 
 
 def make_icons(web):
@@ -79,7 +79,7 @@ def main():
     web = os.path.join(desk, 'web')
     name = desk_name(desk)
     root = f'/{name}/'
-    title = a.name or docket_field(desk, 'title') or name
+    title = a.name or catalog_title(name) or name
     short = a.short or title[:12]
     index_path = os.path.join(web, 'index.html')
     html = open(index_path, encoding='utf-8').read()
@@ -110,7 +110,7 @@ def main():
         html = re.sub(r'</head>', f'<link rel="manifest" href="{root}{rel}" crossorigin="use-credentials">\n</head>',
                       html, count=1, flags=re.I)
 
-    # blank names fail installability; fill them from the docket title
+    # blank names fail installability; fill them from the catalog title
     if not (man.get('name') or '').strip():
         man['name'] = title
     if not (man.get('short_name') or '').strip():

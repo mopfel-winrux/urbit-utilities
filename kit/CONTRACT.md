@@ -15,7 +15,9 @@ your report rather than inventing an endpoint.
     (gitignored), patches and builds it, and writes the result to `desk/web/`.
     Running it from a clean checkout must reproduce `desk/web/`.
   - `desk/`: scaffolded by `kit/new-satellite.sh`. `web/` must include
-    `icon.svg` (or png) for the tile.
+    `icon.svg` (or png): it is the app's icon in the hub launcher and its PWA
+    icon. Satellites have no `desk.docket-0`, so no Landscape tile of their
+    own; the hub is the only entry point.
   - `test.js`: puppeteer smoke test that does one real thing in the app (see
     the testing section below).
   - `NOTES.md`: upstream repo, version or commit, license, what was patched,

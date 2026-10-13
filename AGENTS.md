@@ -34,8 +34,11 @@ and is also the URL: `/<desk>/`.
      `index.html`). Leave it `|` for hash routing.
    - `auth`: `&` (login required, the default), `|` (public), or
      `[& ~[[/share |]]]` (public only under `/<desk>/share`).
-   - Only `app/fileserver/config.hoon` and the docket may differ from the kit.
-     Don't edit the fileserver agent.
+   - Only `app/fileserver/config.hoon` may differ from the kit. Don't edit
+     the fileserver agent.
+   - Satellites have no `desk.docket-0`, so they don't get their own
+     Landscape tile. The hub's launcher is the only entry point; it gets the
+     title, info and icon from `catalog.json` and `web/icon.svg`.
 2. **Write `build.sh`.** It must reproduce `desk/web/` from a clean clone:
    - Fetch a pinned upstream (a tag, a commit, or a tarball checked with
      `sha256sum`) into `upstream/`, which is gitignored.
