@@ -194,7 +194,10 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- dispatch ---------------------------------------------------------
     def handle_any(self):
-        self.body()  # always drain the request body (see body())
+        # one handler serves a whole keep-alive connection: forget the last
+        # request's body, then always drain this one's (see body())
+        self.__dict__.pop('_body', None)
+        self.body()
         url = urlsplit(self.path)
         p = url.path
         if p == '/~/login':
@@ -210,6 +213,8 @@ class Handler(BaseHTTPRequestHandler):
     do_GET = do_HEAD = do_PUT = do_POST = do_DELETE = do_OPTIONS = handle_any
 
     def do_PATCH(self):  # vere rejects anything non-standard
+        self.__dict__.pop('_body', None)
+        self.body()
         self.send(400, 'bad method')
     do_PROPFIND = do_MKCOL = do_MOVE = do_COPY = do_LOCK = do_UNLOCK = do_PROPPATCH = do_PATCH
 
